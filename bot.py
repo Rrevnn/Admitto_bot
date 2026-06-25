@@ -12,14 +12,70 @@ bot = telebot.TeleBot(TOKEN)
 
 # База университетов (начальная)
 UNIVERSITIES = [
+    # IT / Технологии
     {"name": "TU Munich", "country": "Германия", "flag": "🇩🇪", "field": "IT", "cost": "Бесплатно", "rf_ok": True, "scholarship": "DAAD €800/мес"},
     {"name": "TU Berlin", "country": "Германия", "flag": "🇩🇪", "field": "IT", "cost": "Бесплатно", "rf_ok": True, "scholarship": "DAAD"},
+    {"name": "KIT Karlsruhe", "country": "Германия", "flag": "🇩🇪", "field": "IT", "cost": "Бесплатно", "rf_ok": True, "scholarship": "DAAD"},
     {"name": "TU Delft", "country": "Нидерланды", "flag": "🇳🇱", "field": "IT", "cost": "€2,200/год", "rf_ok": True, "scholarship": "Holland Scholarship"},
-    {"name": "Университет Белграда", "country": "Сербия", "flag": "🇷🇸", "field": "Бизнес", "cost": "€2,000/год", "rf_ok": True, "scholarship": "Нет"},
-    {"name": "Budapest Tech", "country": "Венгрия", "flag": "🇭🇺", "field": "IT", "cost": "Бесплатно", "rf_ok": True, "scholarship": "Stipendium Hungaricum"},
-    {"name": "Bilkent University", "country": "Турция", "flag": "🇹🇷", "field": "Бизнес", "cost": "$8,000/год", "rf_ok": True, "scholarship": "Türkiye Scholarships"},
-    {"name": "Heriot-Watt Dubai", "country": "ОАЭ", "flag": "🇦🇪", "field": "Бизнес", "cost": "$12,000/год", "rf_ok": True, "scholarship": "Частичные гранты"},
+    {"name": "Eindhoven University", "country": "Нидерланды", "flag": "🇳🇱", "field": "IT", "cost": "€2,200/год", "rf_ok": True, "scholarship": "Holland Scholarship"},
+    {"name": "Budapest Tech BME", "country": "Венгрия", "flag": "🇭🇺", "field": "IT", "cost": "Бесплатно", "rf_ok": True, "scholarship": "Stipendium Hungaricum"},
     {"name": "KAIST", "country": "Южная Корея", "flag": "🇰🇷", "field": "IT", "cost": "Бесплатно", "rf_ok": True, "scholarship": "GKS стипендия"},
+    {"name": "POSTECH", "country": "Южная Корея", "flag": "🇰🇷", "field": "IT", "cost": "Бесплатно", "rf_ok": True, "scholarship": "GKS стипендия"},
+    {"name": "Tsinghua University", "country": "Китай", "flag": "🇨🇳", "field": "IT", "cost": "Бесплатно", "rf_ok": True, "scholarship": "CSC стипендия"},
+    {"name": "Harbin Institute of Technology", "country": "Китай", "flag": "🇨🇳", "field": "IT", "cost": "Бесплатно", "rf_ok": True, "scholarship": "CSC стипендия"},
+    {"name": "Bilkent University", "country": "Турция", "flag": "🇹🇷", "field": "IT", "cost": "$6,000/год", "rf_ok": True, "scholarship": "Türkiye Scholarships"},
+    {"name": "METU", "country": "Турция", "flag": "🇹🇷", "field": "IT", "cost": "Бесплатно", "rf_ok": True, "scholarship": "Türkiye Scholarships"},
+    {"name": "Czech Technical University", "country": "Чехия", "flag": "🇨🇿", "field": "IT", "cost": "Бесплатно", "rf_ok": True, "scholarship": "Нет"},
+    {"name": "University of Tartu", "country": "Эстония", "flag": "🇪🇪", "field": "IT", "cost": "€1,660/год", "rf_ok": True, "scholarship": "Частичные гранты"},
+    {"name": "Innopolis University", "country": "ОАЭ", "flag": "🇦🇪", "field": "IT", "cost": "$10,000/год", "rf_ok": True, "scholarship": "Нет"},
+    {"name": "Heriot-Watt Dubai", "country": "ОАЭ", "flag": "🇦🇪", "field": "IT", "cost": "$12,000/год", "rf_ok": True, "scholarship": "Частичные гранты"},
+    {"name": "University of Ljubljana", "country": "Словения", "flag": "🇸🇮", "field": "IT", "cost": "€3,000/год", "rf_ok": True, "scholarship": "Нет"},
+    {"name": "Warsaw University of Technology", "country": "Польша", "flag": "🇵🇱", "field": "IT", "cost": "€2,000/год", "rf_ok": True, "scholarship": "Нет"},
+
+    # Естественные науки
+    {"name": "Heidelberg University", "country": "Германия", "flag": "🇩🇪", "field": "Науки", "cost": "Бесплатно", "rf_ok": True, "scholarship": "DAAD"},
+    {"name": "LMU Munich", "country": "Германия", "flag": "🇩🇪", "field": "Науки", "cost": "Бесплатно", "rf_ok": True, "scholarship": "DAAD"},
+    {"name": "University of Vienna", "country": "Австрия", "flag": "🇦🇹", "field": "Науки", "cost": "€1,500/год", "rf_ok": True, "scholarship": "OeAD стипендия"},
+    {"name": "Charles University", "country": "Чехия", "flag": "🇨🇿", "field": "Науки", "cost": "Бесплатно", "rf_ok": True, "scholarship": "Нет"},
+    {"name": "Budapest ELTE", "country": "Венгрия", "flag": "🇭🇺", "field": "Науки", "cost": "Бесплатно", "rf_ok": True, "scholarship": "Stipendium Hungaricum"},
+    {"name": "Seoul National University", "country": "Южная Корея", "flag": "🇰🇷", "field": "Науки", "cost": "Бесплатно", "rf_ok": True, "scholarship": "GKS стипендия"},
+    {"name": "Peking University", "country": "Китай", "flag": "🇨🇳", "field": "Науки", "cost": "Бесплатно", "rf_ok": True, "scholarship": "CSC стипендия"},
+    {"name": "University of Belgrade", "country": "Сербия", "flag": "🇷🇸", "field": "Науки", "cost": "€1,500/год", "rf_ok": True, "scholarship": "Нет"},
+    {"name": "Masaryk University", "country": "Чехия", "flag": "🇨🇿", "field": "Науки", "cost": "Бесплатно", "rf_ok": True, "scholarship": "Нет"},
+    {"name": "University of Debrecen", "country": "Венгрия", "flag": "🇭🇺", "field": "Науки", "cost": "€2,000/год", "rf_ok": True, "scholarship": "Stipendium Hungaricum"},
+    {"name": "Koç University", "country": "Турция", "flag": "🇹🇷", "field": "Науки", "cost": "$5,000/год", "rf_ok": True, "scholarship": "Türkiye Scholarships"},
+    {"name": "University of Buenos Aires", "country": "Аргентина", "flag": "🇦🇷", "field": "Науки", "cost": "Бесплатно", "rf_ok": True, "scholarship": "Нет"},
+    {"name": "University of Wroclaw", "country": "Польша", "flag": "🇵🇱", "field": "Науки", "cost": "€2,000/год", "rf_ok": True, "scholarship": "Нет"},
+    {"name": "Tbilisi State University", "country": "Грузия", "flag": "🇬🇪", "field": "Науки", "cost": "€1,200/год", "rf_ok": True, "scholarship": "Нет"},
+
+    # Бизнес / Экономика
+    {"name": "University of Belgrade Business", "country": "Сербия", "flag": "🇷🇸", "field": "Бизнес", "cost": "€2,000/год", "rf_ok": True, "scholarship": "Нет"},
+    {"name": "Bilkent University Business", "country": "Турция", "flag": "🇹🇷", "field": "Бизнес", "cost": "$8,000/год", "rf_ok": True, "scholarship": "Türkiye Scholarships"},
+    {"name": "Heriot-Watt Dubai Business", "country": "ОАЭ", "flag": "🇦🇪", "field": "Бизнес", "cost": "$12,000/год", "rf_ok": True, "scholarship": "Частичные гранты"},
+    {"name": "Corvinus University", "country": "Венгрия", "flag": "🇭🇺", "field": "Бизнес", "cost": "Бесплатно", "rf_ok": True, "scholarship": "Stipendium Hungaricum"},
+    {"name": "Prague University of Economics", "country": "Чехия", "flag": "🇨🇿", "field": "Бизнес", "cost": "Бесплатно", "rf_ok": True, "scholarship": "Нет"},
+    {"name": "Koç University Business", "country": "Турция", "flag": "🇹🇷", "field": "Бизнес", "cost": "$9,000/год", "rf_ok": True, "scholarship": "Türkiye Scholarships"},
+    {"name": "IE University", "country": "Испания", "flag": "🇪🇸", "field": "Бизнес", "cost": "$15,000/год", "rf_ok": True, "scholarship": "Частичные гранты"},
+    {"name": "Tbilisi Free University", "country": "Грузия", "flag": "🇬🇪", "field": "Бизнес", "cost": "€3,000/год", "rf_ok": True, "scholarship": "Нет"},
+    {"name": "American University of Armenia", "country": "Армения", "flag": "🇦🇲", "field": "Бизнес", "cost": "$5,000/год", "rf_ok": True, "scholarship": "Частичные гранты"},
+    {"name": "Nazarbayev University", "country": "Казахстан", "flag": "🇰🇿", "field": "Бизнес", "cost": "Бесплатно", "rf_ok": True, "scholarship": "Полная стипендия"},
+
+    # Дизайн / Искусство
+    {"name": "Aalto University", "country": "Финляндия", "flag": "🇫🇮", "field": "Дизайн", "cost": "€5,000/год", "rf_ok": True, "scholarship": "Частичные гранты"},
+    {"name": "Design Academy Eindhoven", "country": "Нидерланды", "flag": "🇳🇱", "field": "Дизайн", "cost": "€2,200/год", "rf_ok": True, "scholarship": "Holland Scholarship"},
+    {"name": "Bezalel Academy", "country": "Израиль", "flag": "🇮🇱", "field": "Дизайн", "cost": "$8,000/год", "rf_ok": True, "scholarship": "Частичные гранты"},
+    {"name": "Tbilisi Academy of Arts", "country": "Грузия", "flag": "🇬🇪", "field": "Дизайн", "cost": "€1,500/год", "rf_ok": True, "scholarship": "Нет"},
+    {"name": "Yildiz Technical University", "country": "Турция", "flag": "🇹🇷", "field": "Дизайн", "cost": "Бесплатно", "rf_ok": True, "scholarship": "Türkiye Scholarships"},
+    {"name": "Academy of Fine Arts Vienna", "country": "Австрия", "flag": "🇦🇹", "field": "Дизайн", "cost": "€1,500/год", "rf_ok": True, "scholarship": "OeAD стипендия"},
+
+    # Медицина
+    {"name": "Charles University Medicine", "country": "Чехия", "flag": "🇨🇿", "field": "Медицина", "cost": "€8,000/год", "rf_ok": True, "scholarship": "Нет"},
+    {"name": "University of Debrecen Medicine", "country": "Венгрия", "flag": "🇭🇺", "field": "Медицина", "cost": "€9,000/год", "rf_ok": True, "scholarship": "Stipendium Hungaricum"},
+    {"name": "Semmelweis University", "country": "Венгрия", "flag": "🇭🇺", "field": "Медицина", "cost": "€9,000/год", "rf_ok": True, "scholarship": "Stipendium Hungaricum"},
+    {"name": "Tbilisi State Medical University", "country": "Грузия", "flag": "🇬🇪", "field": "Медицина", "cost": "$5,000/год", "rf_ok": True, "scholarship": "Нет"},
+    {"name": "Ankara University Medicine", "country": "Турция", "flag": "🇹🇷", "field": "Медицина", "cost": "Бесплатно", "rf_ok": True, "scholarship": "Türkiye Scholarships"},
+    {"name": "Poznan University of Medicine", "country": "Польша", "flag": "🇵🇱", "field": "Медицина", "cost": "€6,000/год", "rf_ok": True, "scholarship": "Нет"},
+    {"name": "Yerevan State Medical University", "country": "Армения", "flag": "🇦🇲", "field": "Медицина", "cost": "$4,000/год", "rf_ok": True, "scholarship": "Нет"},
 ]
 
 # Храним данные пользователя во время диалога
