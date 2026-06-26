@@ -71,6 +71,11 @@ UNIVERSITIES = [
     {"name": "University of Wroclaw", "country": "Польша", "flag": "🇵🇱", "field": "Экология", "cost": "€2,000/год", "rf_ok": True, "scholarship": "Нет"},
     {"name": "Budapest ELTE Math", "country": "Венгрия", "flag": "🇭🇺", "field": "Математика", "cost": "Бесплатно", "rf_ok": True, "scholarship": "Stipendium Hungaricum"},
     {"name": "Charles University Math", "country": "Чехия", "flag": "🇨🇿", "field": "Математика", "cost": "Бесплатно", "rf_ok": True, "scholarship": "Нет"},
+    {"name": "Budapest ELTE Astronomy", "country": "Венгрия", "flag": "🇭🇺", "field": "Астрономия", "cost": "Бесплатно", "rf_ok": True, "scholarship": "Stipendium Hungaricum"},
+{"name": "Charles University Astronomy", "country": "Чехия", "flag": "🇨🇿", "field": "Астрономия", "cost": "Бесплатно", "rf_ok": True, "scholarship": "Нет"},
+{"name": "Ankara University Astronomy", "country": "Турция", "flag": "🇹🇷", "field": "Астрономия", "cost": "Бесплатно", "rf_ok": True, "scholarship": "Türkiye Scholarships"},
+{"name": "Peking University Astronomy", "country": "Китай", "flag": "🇨🇳", "field": "Астрономия", "cost": "Бесплатно", "rf_ok": True, "scholarship": "CSC стипендия"},
+{"name": "Seoul National University Astronomy", "country": "Южная Корея", "flag": "🇰🇷", "field": "Астрономия", "cost": "Бесплатно", "rf_ok": True, "scholarship": "GKS стипендия"},
 
     # Бизнес
     {"name": "Corvinus University", "country": "Венгрия", "flag": "🇭🇺", "field": "Менеджмент", "cost": "Бесплатно", "rf_ok": True, "scholarship": "Stipendium Hungaricum"},
