@@ -396,7 +396,8 @@ def show_checklist(message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add('🔍 Подобрать университеты', '📋 Чеклист документов')
     bot.send_message(message.chat.id, text, parse_mode='Markdown', reply_markup=markup)
-@bot.message_handler(func=lambda m: True)
+
+  @bot.message_handler(func=lambda m: True)
 def handle_university_search(message):
     query = message.text.lower()
     found = []
@@ -407,18 +408,56 @@ def handle_university_search(message):
         bot.send_message(message.chat.id,
             "Не нашла такой университет 😔\n\nПроверь название или напиши /start чтобы начать заново.")
         return
+
     uni = found[0]
     rf_status = "✅ Принимают без ограничений" if uni['rf_ok'] else "⚠️ Уточняй на сайте"
+
+    details = {
+        "Разработка": {"ielts": "6.5+", "deadline": "15 января / 15 июля", "duration": "2 года (магистр)", "work": "До 20 часов в неделю", "housing": "Общежитие от €300/мес", "community": "Есть СНГ-чат и встречи"},
+        "Data Science": {"ielts": "6.5+", "deadline": "1 февраля / 1 сентября", "duration": "2 года (магистр)", "work": "До 20 часов в неделю", "housing": "Общежитие от €350/мес", "community": "Есть международное комьюнити"},
+        "AI / Machine Learning": {"ielts": "7.0+", "deadline": "15 января", "duration": "2 года (магистр)", "work": "До 20 часов в неделю", "housing": "Общежитие от €300/мес", "community": "Активное tech-комьюнити"},
+        "Физика": {"ielts": "6.0+", "deadline": "15 января / 1 июля", "duration": "3 года (бакалавр) / 2 года (магистр)", "work": "До 20 часов в неделю", "housing": "Общежитие от €250/мес", "community": "Небольшое СНГ-комьюнити"},
+        "Химия": {"ielts": "6.0+", "deadline": "1 марта", "duration": "3 года (бакалавр)", "work": "До 20 часов в неделю", "housing": "Общежитие от €250/мес", "community": "Есть русскоязычные студенты"},
+        "Биология": {"ielts": "6.0+", "deadline": "1 февраля", "duration": "3 года (бакалавр)", "work": "До 20 часов в неделю", "housing": "Общежитие от €200/мес", "community": "Небольшое"},
+        "Математика": {"ielts": "6.0+", "deadline": "15 января", "duration": "3 года (бакалавр)", "work": "До 20 часов в неделю", "housing": "Общежитие от €250/мес", "community": "Есть"},
+        "Астрономия": {"ielts": "6.0+", "deadline": "1 февраля", "duration": "3 года (бакалавр)", "work": "До 20 часов в неделю", "housing": "Общежитие от €250/мес", "community": "Небольшое"},
+        "Общая медицина": {"ielts": "6.5+", "deadline": "1 марта", "duration": "6 лет", "work": "Ограниченно", "housing": "Общежитие от €200/мес", "community": "Большое СНГ-комьюнити"},
+        "Менеджмент": {"ielts": "6.5+", "deadline": "1 февраля", "duration": "2 года (магистр)", "work": "До 20 часов в неделю", "housing": "Общежитие от €300/мес", "community": "Активное бизнес-комьюнити"},
+        "Финансы": {"ielts": "6.5+", "deadline": "15 января", "duration": "2 года (магистр)", "work": "До 20 часов в неделю", "housing": "Общежитие от €300/мес", "community": "Есть"},
+        "Архитектура": {"ielts": "6.0+", "deadline": "1 марта", "duration": "4 года (бакалавр)", "work": "До 20 часов в неделю", "housing": "Общежитие от €300/мес", "community": "Творческое комьюнити"},
+        "Политология": {"ielts": "6.5+", "deadline": "1 февраля", "duration": "2 года (магистр)", "work": "До 20 часов в неделю", "housing": "Общежитие от €250/мес", "community": "Есть"},
+        "Право": {"ielts": "6.5+", "deadline": "1 марта", "duration": "3 года (бакалавр)", "work": "До 20 часов в неделю", "housing": "Общежитие от €200/мес", "community": "Небольшое"},
+    }
+
+    d = details.get(uni['field'], {
+        "ielts": "Уточняй на сайте",
+        "deadline": "Уточняй на сайте",
+        "duration": "Уточняй на сайте",
+        "work": "До 20 часов в неделю",
+        "housing": "Уточняй на сайте",
+        "community": "Уточняй в местных чатах"
+    })
+
     response = (
         f"{uni['flag']} *{uni['name']}*\n"
-        f"📍 {uni['country']}\n\n"
-        f"💰 Стоимость обучения: {uni['cost']}\n"
-        f"🎓 Стипендия: {uni['scholarship']}\n"
-        f"🇷🇺 Граждане РФ: {rf_status}\n"
-        f"📚 Специальность: {uni['field']}\n\n"
-        f"Хочешь добавить в план поступления? Напиши /start чтобы начать заново или выбрать другой университет."
+        f"📍 {uni['country']} · {uni['field']}\n\n"
+        f"💰 *Финансы*\n"
+        f"Обучение: {uni['cost']}\n"
+        f"Стипендия: {uni['scholarship']}\n"
+        f"Работа во время учёбы: {d['work']}\n\n"
+        f"📋 *Поступление*\n"
+        f"IELTS: {d['ielts']}\n"
+        f"Дедлайн подачи: {d['deadline']}\n"
+        f"Длительность программы: {d['duration']}\n\n"
+        f"🏠 *Жизнь*\n"
+        f"Жильё: {d['housing']}\n"
+        f"СНГ-комьюнити: {d['community']}\n\n"
+        f"🇷🇺 *Для граждан РФ:* {rf_status}\n\n"
+        f"📌 Нужен чеклист документов для {uni['country']}? Нажми кнопку ниже!"
     )
+
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    markup.add('🔍 Подобрать заново', '📋 Чеклист документов')
+    markup.add(f"📋 Чеклист для {uni['country']}")
+    markup.add('🔍 Подобрать заново')
     bot.send_message(message.chat.id, response, parse_mode='Markdown', reply_markup=markup)
 bot.infinity_polling() 
