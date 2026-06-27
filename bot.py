@@ -396,5 +396,29 @@ def show_checklist(message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add('🔍 Подобрать университеты', '📋 Чеклист документов')
     bot.send_message(message.chat.id, text, parse_mode='Markdown', reply_markup=markup)
-
+@bot.message_handler(func=lambda m: True)
+def handle_university_search(message):
+    query = message.text.lower()
+    found = []
+    for uni in UNIVERSITIES:
+        if query in uni['name'].lower():
+            found.append(uni)
+    if not found:
+        bot.send_message(message.chat.id,
+            "Не нашла такой университет 😔\n\nПроверь название или напиши /start чтобы начать заново.")
+        return
+    uni = found[0]
+    rf_status = "✅ Принимают без ограничений" if uni['rf_ok'] else "⚠️ Уточняй на сайте"
+    response = (
+        f"{uni['flag']} *{uni['name']}*\n"
+        f"📍 {uni['country']}\n\n"
+        f"💰 Стоимость обучения: {uni['cost']}\n"
+        f"🎓 Стипендия: {uni['scholarship']}\n"
+        f"🇷🇺 Граждане РФ: {rf_status}\n"
+        f"📚 Специальность: {uni['field']}\n\n"
+        f"Хочешь добавить в план поступления? Напиши /start чтобы начать заново или выбрать другой университет."
+    )
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    markup.add('🔍 Подобрать заново', '📋 Чеклист документов')
+    bot.send_message(message.chat.id, response, parse_mode='Markdown', reply_markup=markup)
 bot.infinity_polling() 
