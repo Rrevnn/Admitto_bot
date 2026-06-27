@@ -197,6 +197,16 @@ UNIVERSITIES = [
     {"name": "MIT", "country": "США", "flag": "🇺🇸", "field": "Архитектура", "cost": "$57,000/год", "rf_ok": True, "scholarship": "Частичные гранты"},
     {"name": "Columbia University", "country": "США", "flag": "🇺🇸", "field": "Международные отношения", "cost": "$63,000/год", "rf_ok": True, "scholarship": "Частичные гранты"},
     {"name": "Columbia University", "country": "США", "flag": "🇺🇸", "field": "Дипломатия", "cost": "$63,000/год", "rf_ok": True, "scholarship": "Частичные гранты"},
+    {"name": "University of Vienna Education", "country": "Австрия", "flag": "🇦🇹", "field": "Педагогика", "cost": "€1,500/год", "rf_ok": True, "scholarship": "OeAD стипендия"},
+    {"name": "Charles University Education", "country": "Чехия", "flag": "🇨🇿", "field": "Педагогика", "cost": "Бесплатно", "rf_ok": True, "scholarship": "Нет"},
+    {"name": "Budapest ELTE Education", "country": "Венгрия", "flag": "🇭🇺", "field": "Педагогика", "cost": "Бесплатно", "rf_ok": True, "scholarship": "Stipendium Hungaricum"},
+    {"name": "University of Belgrade Education", "country": "Сербия", "flag": "🇷🇸", "field": "Педагогика", "cost": "€1,200/год", "rf_ok": True, "scholarship": "Нет"},
+    {"name": "Tbilisi State University Education", "country": "Грузия", "flag": "🇬🇪", "field": "Педагогика", "cost": "€1,000/год", "rf_ok": True, "scholarship": "Нет"},
+    {"name": "Ankara University Education", "country": "Турция", "flag": "🇹🇷", "field": "Педагогика", "cost": "Бесплатно", "rf_ok": True, "scholarship": "Türkiye Scholarships"},
+    {"name": "Koç University Education", "country": "Турция", "flag": "🇹🇷", "field": "Педагогика", "cost": "$5,000/год", "rf_ok": True, "scholarship": "Türkiye Scholarships"},
+    {"name": "Peking University Education", "country": "Китай", "flag": "🇨🇳", "field": "Педагогика", "cost": "Бесплатно", "rf_ok": True, "scholarship": "CSC стипендия"},
+    {"name": "Seoul National University Education", "country": "Южная Корея", "flag": "🇰🇷", "field": "Педагогика", "cost": "Бесплатно", "rf_ok": True, "scholarship": "GKS стипендия"},
+    {"name": "Nazarbayev University Education", "country": "Казахстан", "flag": "🇰🇿", "field": "Педагогика", "cost": "Бесплатно", "rf_ok": True, "scholarship": "Полная стипендия"},
 ]
 
 @bot.message_handler(commands=['start'])
