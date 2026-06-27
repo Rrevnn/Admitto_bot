@@ -306,9 +306,7 @@ def ask_budget(message):
 
 def get_profile_type(data):
     hobbies = data.get('hobbies', '')
-    personality = data.get('personality', '')
     career = data.get('career', '')
-    goal = data.get('goal', '')
     if 'Технологии' in hobbies or 'IT' in career:
         return "🚀 Технологический лидер", "Аналитический ум, любишь решать сложные задачи, нацелен на tech-карьеру"
     elif 'Наука' in hobbies or 'Наука' in career:
@@ -365,7 +363,7 @@ def show_results(message):
             f"💰 {uni['cost']} · 🎓 {uni['scholarship']}\n"
             f"Граждане РФ: {rf_status}\n\n"
         )
-    response += "Хочешь узнать подробнее? Просто напиши название университета!"
+    response += "📌 Напиши название университета чтобы узнать подробнее!"
 
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add('🔍 Подобрать заново', '📋 Чеклист документов')
@@ -396,7 +394,8 @@ def show_checklist(message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add('🔍 Подобрать университеты', '📋 Чеклист документов')
     bot.send_message(message.chat.id, text, parse_mode='Markdown', reply_markup=markup)
-  @bot.message_handler(func=lambda m: True)
+
+@bot.message_handler(func=lambda m: True)
 def handle_university_search(message):
     query = message.text.lower()
     found = []
@@ -459,4 +458,5 @@ def handle_university_search(message):
     markup.add(f"📋 Чеклист для {uni['country']}")
     markup.add('🔍 Подобрать заново')
     bot.send_message(message.chat.id, response, parse_mode='Markdown', reply_markup=markup)
-bot.infinity_polling() 
+
+bot.infinity_polling()
