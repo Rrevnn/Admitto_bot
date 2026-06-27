@@ -396,7 +396,6 @@ def show_checklist(message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add('🔍 Подобрать университеты', '📋 Чеклист документов')
     bot.send_message(message.chat.id, text, parse_mode='Markdown', reply_markup=markup)
-
   @bot.message_handler(func=lambda m: True)
 def handle_university_search(message):
     query = message.text.lower()
