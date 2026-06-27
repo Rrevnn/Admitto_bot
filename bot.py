@@ -155,6 +155,16 @@ UNIVERSITIES = [
     {"name": "University of Vienna Education", "country": "Австрия", "flag": "🇦🇹", "field": "Педагогика", "cost": "€1,500/год", "rf_ok": True, "scholarship": "OeAD стипендия"},
     {"name": "Budapest ELTE Education", "country": "Венгрия", "flag": "🇭🇺", "field": "Педагогика", "cost": "Бесплатно", "rf_ok": True, "scholarship": "Stipendium Hungaricum"},
     {"name": "Charles University Education", "country": "Чехия", "flag": "🇨🇿", "field": "Психология образования", "cost": "Бесплатно", "rf_ok": True, "scholarship": "Нет"},
+    {"name": "University of Amsterdam", "country": "Нидерланды", "flag": "🇳🇱", "field": "Data Science", "cost": "€2,314/год", "rf_ok": True, "scholarship": "Holland Scholarship"},
+    {"name": "Budapest Tech BME DS", "country": "Венгрия", "flag": "🇭🇺", "field": "Data Science", "cost": "Бесплатно", "rf_ok": True, "scholarship": "Stipendium Hungaricum"},
+    {"name": "Charles University DS", "country": "Чехия", "flag": "🇨🇿", "field": "Data Science", "cost": "Бесплатно", "rf_ok": True, "scholarship": "Нет"},
+    {"name": "University of Vienna DS", "country": "Австрия", "flag": "🇦🇹", "field": "Data Science", "cost": "€1,500/год", "rf_ok": True, "scholarship": "OeAD стипендия"},
+    {"name": "Bilkent University DS", "country": "Турция", "flag": "🇹🇷", "field": "Data Science", "cost": "$5,000/год", "rf_ok": True, "scholarship": "Türkiye Scholarships"},
+    {"name": "Tsinghua University DS", "country": "Китай", "flag": "🇨🇳", "field": "Data Science", "cost": "Бесплатно", "rf_ok": True, "scholarship": "CSC стипендия"},
+    {"name": "KAIST DS", "country": "Южная Корея", "flag": "🇰🇷", "field": "Data Science", "cost": "Бесплатно", "rf_ok": True, "scholarship": "GKS стипендия"},
+    {"name": "Tbilisi State University DS", "country": "Грузия", "flag": "🇬🇪", "field": "Data Science", "cost": "€1,500/год", "rf_ok": True, "scholarship": "Нет"},
+    {"name": "University of Belgrade DS", "country": "Сербия", "flag": "🇷🇸", "field": "Data Science", "cost": "€1,500/год", "rf_ok": True, "scholarship": "Нет"},
+    {"name": "Nazarbayev University DS", "country": "Казахстан", "flag": "🇰🇿", "field": "Data Science", "cost": "Бесплатно", "rf_ok": True, "scholarship": "Полная стипендия"},
 ]
 
 @bot.message_handler(commands=['start'])
