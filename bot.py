@@ -397,4 +397,4 @@ def show_checklist(message):
     markup.add('🔍 Подобрать университеты', '📋 Чеклист документов')
     bot.send_message(message.chat.id, text, parse_mode='Markdown', reply_markup=markup)
 
-bot.infinity_polling()
+bot.infinity_polling() 
