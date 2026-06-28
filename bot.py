@@ -392,3 +392,259 @@ def ask_career(message):
     markup.add('🚀 Своё дело', '🔬 Наука')
     markup.add('🌱 Социальные проекты')
     bot.send_message(message.chat.id, "Карьерная цель?", reply_markup=markup)
+    bot.register_next_step_handler(message, ask_priority)
+
+def ask_priority(message):
+    user_data[message.chat.id]['career'] = message.text
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    markup.add('🏆 Рейтинг вуза', '💰 Стоимость')
+    markup.add('🌍 Страна', '💼 Трудоустройство')
+    markup.add('🏙️ Город и жизнь', '🔒 Безопасность')
+    bot.send_message(message.chat.id, "Что важнее при выборе университета?", reply_markup=markup)
+    bot.register_next_step_handler(message, ask_main_field)
+
+def ask_main_field(message):
+    user_data[message.chat.id]['priority'] = message.text
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    for field in FIELDS.keys():
+        markup.add(field)
+    bot.send_message(message.chat.id,
+        "Почти готово! 🎯\n\nВыбери направление учёбы:",
+        reply_markup=markup)
+    bot.register_next_step_handler(message, ask_sub_field)
+
+def ask_sub_field(message):
+    main_field = message.text
+    if main_field not in FIELDS:
+        bot.send_message(message.chat.id, "Пожалуйста выбери направление из списка")
+        bot.register_next_step_handler(message, ask_sub_field)
+        return
+    user_data[message.chat.id]['main_field'] = main_field
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    for sub in FIELDS[main_field]:
+        markup.add(sub)
+    bot.send_message(message.chat.id, "Уточни специальность:", reply_markup=markup)
+    bot.register_next_step_handler(message, ask_sub_subfield)
+
+def ask_sub_subfield(message):
+    sub_field = message.text
+    user_data[message.chat.id]['field'] = sub_field
+    clean_field = sub_field.split(' ', 1)[1] if ' ' in sub_field else sub_field
+    subfields = SUBFIELDS.get(clean_field, [])
+    if subfields:
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        for s in subfields:
+            markup.add(s)
+        markup.add('➖ Любое направление')
+        bot.send_message(message.chat.id,
+            f"Уточни направление в рамках {clean_field}:",
+            reply_markup=markup)
+        bot.register_next_step_handler(message, ask_budget)
+    else:
+        ask_budget(message)
+
+def ask_budget(message):
+    if 'subfield' not in user_data[message.chat.id]:
+        user_data[message.chat.id]['subfield'] = message.text
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    markup.add('💚 Бесплатно / стипендия')
+    markup.add('💛 До €5,000 в год')
+    markup.add('🧡 До €15,000 в год')
+    markup.add('❤️ Бюджет не ограничен')
+    bot.send_message(message.chat.id, "Бюджет на обучение в год?", reply_markup=markup)
+    bot.register_next_step_handler(message, show_results)
+
+def get_profile_type(data):
+    hobbies = data.get('hobbies', '')
+    career = data.get('career', '')
+    if 'Технологии' in hobbies or 'IT' in career:
+        return "🚀 Технологический лидер", "Аналитический ум, любишь решать сложные задачи, нацелен на tech-карьеру"
+    elif 'Наука' in hobbies or 'Наука' in career:
+        return "🔬 Исследователь", "Глубокое мышление, любишь докапываться до сути, создан для науки"
+    elif 'Бизнес' in hobbies or 'Своё дело' in career:
+        return "💼 Предприниматель", "Амбициозный, видишь возможности там где другие видят проблемы"
+    elif 'Искусство' in hobbies:
+        return "🎨 Творческая личность", "Мыслишь образами, создаёшь красоту, видишь мир иначе"
+    elif 'Волонтёрство' in hobbies or 'Социальные' in career:
+        return "🌱 Созидатель", "Хочешь менять мир к лучшему, люди для тебя важнее денег"
+    else:
+        return "🌍 Искатель возможностей", "Открыт к новому, гибкий, найдёшь себя в любой среде"
+
+def get_missing_requirements(data, budget):
+    missing = []
+    english = data.get('english', '')
+    certificate = data.get('certificate', '')
+    passport = data.get('passport', '')
+    gpa = data.get('gpa', '')
+    if 'A1' in english or 'A2' in english:
+        missing.append("📚 Подтяни английский до B2 минимум — большинство программ требуют B2-C1")
+    if '➖ Нет' in certificate:
+        missing.append("📝 Сдай IELTS или TOEFL — без сертификата не примут в большинство вузов")
+    if 'Планирую' in certificate:
+        missing.append("⏰ Запишись на IELTS как можно скорее — подготовка занимает 3-6 месяцев")
+    if '❌ Нет' in passport:
+        missing.append("🛂 Оформи загранпаспорт — без него невозможно подать документы")
+    if '⚠️' in passport:
+        missing.append("🛂 Продли загранпаспорт — он должен быть действителен минимум 1.5 года")
+    if 'Удовл' in gpa:
+        missing.append("📊 Подними средний балл — большинство вузов требуют хорошую успеваемость")
+    if 'Бесплатно' in budget:
+        missing.append("💰 Расширь бюджет или активно ищи стипендии — бесплатных мест мало и конкурс высокий")
+    return missing
+
+def show_results(message):
+    data = user_data.get(message.chat.id, {})
+    citizenship = data.get('citizenship', '')
+    field = data.get('field', '')
+    budget = message.text
+    is_rf = 'Россия' in citizenship
+    clean_field = field.split(' ', 1)[1] if ' ' in field else field
+
+    bot.send_message(message.chat.id, "⏳ Анализирую твой профиль и ищу лучшие варианты...")
+
+    try:
+        UNIVERSITIES = get_universities()
+    except Exception as e:
+        bot.send_message(message.chat.id, "Ошибка загрузки базы университетов. Попробуй позже.")
+        return
+
+    results = []
+    for uni in UNIVERSITIES:
+        if not uni['name']:
+            continue
+        if is_rf and not uni['rf_ok']:
+            continue
+        if uni['field'] != clean_field:
+            continue
+        if 'Бесплатно' in budget and uni['cost'] != 'Бесплатно':
+            continue
+        uni['score'] = score_university(uni, data)
+        results.append(uni)
+
+    results.sort(key=lambda x: x['score'], reverse=True)
+
+    name = data.get('name', '')
+    profile_type, profile_desc = get_profile_type(data)
+    subfield = data.get('subfield', '')
+
+    profile_msg = (
+        f"✨ *Твой профиль готов, {name}!*\n\n"
+        f"{profile_type}\n"
+        f"_{profile_desc}_\n\n"
+    )
+    bot.send_message(message.chat.id, profile_msg, parse_mode='Markdown')
+
+    if not results:
+        missing = get_missing_requirements(data, budget)
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        markup.add('🔍 Подобрать заново', '📋 Чеклист документов')
+        no_results_msg = f"😔 По твоим критериям не нашла подходящих университетов для *{clean_field}*.\n\n"
+        if missing:
+            no_results_msg += "📋 *Вот что стоит подготовить:*\n\n"
+            for item in missing:
+                no_results_msg += f"{item}\n"
+            no_results_msg += "\n"
+        no_results_msg += (
+            "💡 *Попробуй:*\n"
+            "— Расширить бюджет\n"
+            "— Выбрать другую страну\n"
+            "— Рассмотреть смежные специальности\n\n"
+            "Нажми *Подобрать заново* чтобы изменить параметры!"
+        )
+        bot.send_message(message.chat.id, no_results_msg, parse_mode='Markdown', reply_markup=markup)
+        return
+
+    subfield_text = f" · {subfield}" if subfield and '➖' not in subfield else ""
+    response = f"🎯 *Топ университетов для тебя — {clean_field}{subfield_text}:*\n\n"
+    for uni in results[:6]:
+        rf_status = "✅" if uni['rf_ok'] else "⚠️"
+        stars = "⭐" * min(uni['score'], 5) if uni['score'] > 0 else ""
+        response += (
+            f"{uni['flag']} *{uni['name']}* — {uni['country']} {stars}\n"
+            f"💰 {uni['cost']} · 🎓 {uni['scholarship']} · РФ: {rf_status}\n\n"
+        )
+    response += (
+        "📌 Напиши название университета чтобы узнать подробнее!\n\n"
+        "⚠️ _Данные актуальны на 2025 год. Всегда проверяй информацию на официальном сайте._"
+    )
+
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    markup.add('🔍 Подобрать заново', '📋 Чеклист документов')
+    bot.send_message(message.chat.id, response, parse_mode='Markdown', reply_markup=markup)
+
+@bot.message_handler(func=lambda m: m.text == '📋 Чеклист документов')
+def checklist(message):
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    markup.add('🇩🇪 Германия', '🇳🇱 Нидерланды')
+    markup.add('🇭🇺 Венгрия', '🇨🇿 Чехия')
+    markup.add('🇷🇸 Сербия', '🇬🇪 Грузия')
+    markup.add('🇹🇷 Турция', '🇨🇳 Китай')
+    bot.send_message(message.chat.id, "Для какой страны нужен чеклист?", reply_markup=markup)
+    bot.register_next_step_handler(message, show_checklist)
+
+def show_checklist(message):
+    checklists = {
+        '🇩🇪 Германия': "📋 *Документы для Германии:*\n\n✅ Загранпаспорт\n✅ Аттестат + нострификация\n✅ IELTS 6.5+ или TestDaF\n✅ Мотивационное письмо\n✅ 2 рекомендательных письма\n✅ CV / резюме\n✅ Sperrkonto €11,208\n✅ Медицинская страховка\n\n⚠️ Для РФ: подача через uni-assist, срок до 8 недель",
+        '🇳🇱 Нидерланды': "📋 *Документы для Нидерландов:*\n\n✅ Загранпаспорт\n✅ Аттестат (перевод + апостиль)\n✅ IELTS 6.0+\n✅ Мотивационное письмо\n✅ CV / резюме\n✅ Выписка с банковского счёта\n\n⚠️ Подача через Studielink",
+        '🇭🇺 Венгрия': "📋 *Документы для Венгрии:*\n\n✅ Загранпаспорт\n✅ Аттестат (перевод + апостиль)\n✅ IELTS 5.5+\n✅ Мотивационное письмо\n✅ CV / резюме\n✅ Медицинская справка\n\n🎓 Stipendium Hungaricum покрывает всё!",
+        '🇨🇿 Чехия': "📋 *Документы для Чехии:*\n\n✅ Загранпаспорт\n✅ Аттестат (нострификация)\n✅ Чешский язык B2 (для бесплатного)\n✅ Мотивационное письмо\n✅ CV / резюме\n\n⚠️ Бесплатно только на чешском языке",
+        '🇷🇸 Сербия': "📋 *Документы для Сербии:*\n\n✅ Загранпаспорт\n✅ Аттестат (перевод на сербский)\n✅ Справка об отсутствии судимости\n✅ Медицинская справка\n\n✅ Виза не нужна для граждан РФ!",
+        '🇬🇪 Грузия': "📋 *Документы для Грузии:*\n\n✅ Загранпаспорт\n✅ Аттестат (перевод)\n✅ IELTS 5.5+ (для англоязычных)\n✅ Мотивационное письмо\n\n✅ Виза не нужна для граждан РФ!",
+        '🇹🇷 Турция': "📋 *Документы для Турции:*\n\n✅ Загранпаспорт\n✅ Аттестат (перевод + апостиль)\n✅ IELTS 6.0+\n✅ Мотивационное письмо\n✅ CV / резюме\n\n🎓 Türkiye Scholarships — подай до февраля!",
+        '🇨🇳 Китай': "📋 *Документы для Китая:*\n\n✅ Загранпаспорт\n✅ Аттестат (перевод + апостиль)\n✅ Медицинская справка\n✅ Мотивационное письмо\n✅ CV / резюме\n\n🎓 Стипендия CSC покрывает обучение и проживание!",
+    }
+    text = checklists.get(message.text, "Пока нет чеклиста для этой страны. Скоро добавим!")
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    markup.add('🔍 Подобрать университеты', '📋 Чеклист документов')
+    bot.send_message(message.chat.id, text, parse_mode='Markdown', reply_markup=markup)
+
+@bot.message_handler(func=lambda m: True)
+def handle_university_search(message):
+    query = message.text.lower()
+    try:
+        UNIVERSITIES = get_universities()
+    except:
+        bot.send_message(message.chat.id, "Ошибка загрузки базы. Попробуй позже.")
+        return
+
+    found = [u for u in UNIVERSITIES if query in u['name'].lower()]
+
+    if not found:
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        markup.add('🔍 Подобрать университеты', '📋 Чеклист документов')
+        bot.send_message(message.chat.id,
+            "Не нашла такой университет 😔\n\nПроверь название или напиши /start чтобы начать заново.",
+            reply_markup=markup)
+        return
+
+    uni = found[0]
+    rf_status = "✅ Принимают без ограничений" if uni['rf_ok'] else "⚠️ Уточняй на сайте"
+
+    response = (
+        f"{uni['flag']} *{uni['name']}*\n"
+        f"📍 {uni['country']} · {uni['field']}\n\n"
+        f"💰 *Финансы*\n"
+        f"Обучение: {uni['cost']}\n"
+        f"Стипендия: {uni['scholarship']}\n"
+        f"Работа во время учёбы: {uni['work']}\n\n"
+        f"📋 *Поступление*\n"
+        f"Язык обучения: {uni['language']}\n"
+        f"IELTS: {uni['ielts']}\n"
+        f"Дедлайн подачи: {uni['deadline']}\n"
+        f"Длительность программы: {uni['duration']}\n\n"
+        f"⭐ *Сильные стороны программы*\n"
+        f"{uni['strengths']}\n\n"
+        f"🏠 *Жизнь*\n"
+        f"Жильё: {uni['housing']}\n"
+        f"СНГ-комьюнити: {uni['community']}\n\n"
+        f"🇷🇺 *Для граждан РФ:* {rf_status}\n\n"
+        f"⚠️ _Данные актуальны на 2025 год. Проверяй на официальном сайте._\n\n"
+        f"📌 Нужен чеклист документов для {uni['country']}?"
+    )
+
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    markup.add(f"📋 Чеклист для {uni['country']}")
+    markup.add('🔍 Подобрать заново')
+    bot.send_message(message.chat.id, response, parse_mode='Markdown', reply_markup=markup)
+
+bot.infinity_polling()
