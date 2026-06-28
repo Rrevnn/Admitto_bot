@@ -60,7 +60,6 @@ def score_university(uni, data):
     community = uni.get('community', '')
     scholarship = uni.get('scholarship', 'Нет')
 
-    # Язык → бонус за знание местного языка
     if 'Немецкий' in other_language and country == 'Германия':
         score += 3
     if 'Немецкий' in other_language and country == 'Австрия':
@@ -78,7 +77,6 @@ def score_university(uni, data):
     if 'Венгерский' in other_language and country == 'Венгрия':
         score += 3
 
-    # Увлечения → рекомендации стран
     if 'Технологии' in hobbies and country in ['Германия', 'Нидерланды', 'Южная Корея', 'Эстония']:
         score += 2
     if 'Искусство' in hobbies and country in ['Австрия', 'Чехия', 'Грузия', 'Израиль']:
@@ -92,7 +90,6 @@ def score_university(uni, data):
     if 'Спорт' in hobbies and country in ['Германия', 'Нидерланды', 'Венгрия']:
         score += 1
 
-    # Карьерная цель → страны
     if 'IT' in career or 'Стартап' in career:
         if country in ['Германия', 'Нидерланды', 'Эстония', 'Южная Корея']:
             score += 2
@@ -109,23 +106,20 @@ def score_university(uni, data):
         if country in ['Германия', 'Нидерланды', 'Австрия']:
             score += 2
 
-    # Цель после учёбы → страны с хорошей иммиграцией
     if 'Остаться' in goal:
-        if country in ['Германия', 'Канада', 'Нидерланды', 'Эстония']:
+        if country in ['Германия', 'Нидерланды', 'Эстония']:
             score += 2
     if 'Вернуться' in goal:
         if country in ['Сербия', 'Грузия', 'Армения', 'Казахстан']:
             score += 1
 
-    # Достижения → стипендии
     if 'Международные' in achievements:
-        if scholarship != 'Нет' and 'Нет' not in scholarship:
+        if scholarship != 'Нет':
             score += 3
     if 'Национальные' in achievements:
-        if scholarship != 'Нет' and 'Нет' not in scholarship:
+        if scholarship != 'Нет':
             score += 2
 
-    # Личность → тип университета
     if 'Интроверт' in personality:
         if country in ['Германия', 'Чехия', 'Венгрия']:
             score += 1
@@ -133,7 +127,6 @@ def score_university(uni, data):
         if country in ['Турция', 'ОАЭ', 'Испания', 'США']:
             score += 1
 
-    # Приоритет при выборе
     if 'Рейтинг' in priority:
         if country in ['США', 'Великобритания', 'Германия']:
             score += 2
@@ -147,7 +140,6 @@ def score_university(uni, data):
         if country in ['Германия', 'США', 'Нидерланды', 'Великобритания']:
             score += 2
 
-    # СНГ-комьюнити бонус
     if 'Большое СНГ' in community or 'Активное СНГ' in community:
         score += 1
 
@@ -314,7 +306,13 @@ def ask_other_language(message):
 def ask_other_language_level(message):
     user_data[message.chat.id]['other_language'] = message.text
     if '➖' in message.text:
-        ask_passport(message)
+        user_data[message.chat.id]['other_language_level'] = 'Нет'
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        markup.add('✅ Есть, действующий')
+        markup.add('⚠️ Скоро истечёт')
+        markup.add('❌ Нет')
+        bot.send_message(message.chat.id, "Загранпаспорт?", reply_markup=markup)
+        bot.register_next_step_handler(message, ask_visa)
         return
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add('🔴 Начинающий (A1–A2)', '🟡 Средний (B1–B2)')
@@ -323,8 +321,7 @@ def ask_other_language_level(message):
     bot.register_next_step_handler(message, ask_passport)
 
 def ask_passport(message):
-    if 'other_language_level' not in user_data[message.chat.id]:
-        user_data[message.chat.id]['other_language_level'] = message.text
+    user_data[message.chat.id]['other_language_level'] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add('✅ Есть, действующий')
     markup.add('⚠️ Скоро истечёт')
@@ -547,7 +544,6 @@ def show_results(message):
         no_results_msg += (
             "💡 *Попробуй:*\n"
             "— Расширить бюджет\n"
-            "— Выбрать другую страну\n"
             "— Рассмотреть смежные специальности\n\n"
             "Нажми *Подобрать заново* чтобы изменить параметры!"
         )
