@@ -40,6 +40,7 @@ def get_universities():
                 "community": fields.get("community", "Уточняй на сайте"),
                 "strengths": fields.get("strengths", "Уточняй на официальном сайте"),
                 "work": fields.get("work", "До 20 часов в неделю"),
+                "language": fields.get("language", "Уточняй на сайте"),
             })
         offset = data.get("offset")
         if not offset:
@@ -363,13 +364,36 @@ def get_profile_type(data):
     else:
         return "🌍 Искатель возможностей", "Открыт к новому, гибкий, найдёшь себя в любой среде"
 
+def get_missing_requirements(data, budget):
+    missing = []
+    english = data.get('english', '')
+    certificate = data.get('certificate', '')
+    passport = data.get('passport', '')
+    gpa = data.get('gpa', '')
+
+    if 'A1' in english or 'A2' in english:
+        missing.append("📚 Подтяни английский до B2 минимум — большинство программ требуют B2-C1")
+    if '➖ Нет' in certificate:
+        missing.append("📝 Сдай IELTS или TOEFL — без сертификата не примут в большинство вузов")
+    if 'Планирую' in certificate:
+        missing.append("⏰ Запишись на IELTS как можно скорее — подготовка занимает 3-6 месяцев")
+    if '❌ Нет' in passport:
+        missing.append("🛂 Оформи загранпаспорт — без него невозможно подать документы")
+    if '⚠️' in passport:
+        missing.append("🛂 Продли загранпаспорт — он должен быть действителен минимум 1.5 года")
+    if 'Удовл' in gpa:
+        missing.append("📊 Подними средний балл — большинство вузов требуют хорошую успеваемость")
+    if 'Бесплатно' in budget:
+        missing.append("💰 Расширь бюджет или активно ищи стипендии — бесплатных мест мало и конкурс высокий")
+
+    return missing
+
 def show_results(message):
     data = user_data.get(message.chat.id, {})
     citizenship = data.get('citizenship', '')
     field = data.get('field', '')
     budget = message.text
     is_rf = 'Россия' in citizenship
-
     clean_field = field.split(' ', 1)[1] if ' ' in field else field
 
     bot.send_message(message.chat.id, "⏳ Ищу подходящие университеты...")
@@ -404,11 +428,29 @@ def show_results(message):
     bot.send_message(message.chat.id, profile_msg, parse_mode='Markdown')
 
     if not results:
+        missing = get_missing_requirements(data, budget)
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-        markup.add('🔍 Подобрать заново')
-        bot.send_message(message.chat.id,
-            "Не нашла точных совпадений 😔\n\nПопробуй расширить бюджет или выбрать другую специальность.",
-            reply_markup=markup)
+        markup.add('🔍 Подобрать заново', '📋 Чеклист документов')
+
+        no_results_msg = (
+            f"😔 По твоим критериям не нашла подходящих университетов для *{clean_field}*.\n\n"
+        )
+
+        if missing:
+            no_results_msg += "📋 *Вот что стоит подготовить:*\n\n"
+            for item in missing:
+                no_results_msg += f"{item}\n"
+            no_results_msg += "\n"
+
+        no_results_msg += (
+            "💡 *Попробуй:*\n"
+            "— Расширить бюджет\n"
+            "— Выбрать другую страну\n"
+            "— Рассмотреть смежные специальности\n\n"
+            "Нажми *Подобрать заново* чтобы изменить параметры!"
+        )
+
+        bot.send_message(message.chat.id, no_results_msg, parse_mode='Markdown', reply_markup=markup)
         return
 
     subfield_text = f" · {subfield}" if subfield and '➖' not in subfield else ""
@@ -466,8 +508,11 @@ def handle_university_search(message):
     found = [u for u in UNIVERSITIES if query in u['name'].lower()]
 
     if not found:
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        markup.add('🔍 Подобрать университеты', '📋 Чеклист документов')
         bot.send_message(message.chat.id,
-            "Не нашла такой университет 😔\n\nПроверь название или напиши /start чтобы начать заново.")
+            "Не нашла такой университет 😔\n\nПроверь название или напиши /start чтобы начать заново.",
+            reply_markup=markup)
         return
 
     uni = found[0]
@@ -481,6 +526,7 @@ def handle_university_search(message):
         f"Стипендия: {uni['scholarship']}\n"
         f"Работа во время учёбы: {uni['work']}\n\n"
         f"📋 *Поступление*\n"
+        f"Язык обучения: {uni['language']}\n"
         f"IELTS: {uni['ielts']}\n"
         f"Дедлайн подачи: {uni['deadline']}\n"
         f"Длительность программы: {uni['duration']}\n\n"
