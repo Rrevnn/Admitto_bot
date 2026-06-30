@@ -684,7 +684,7 @@ def show_results(message):
     for uni in UNIVERSITIES:
         if not uni["name"]: continue
         if is_rf and not uni["rf_ok"]: continue
-        if uni["field"].strip().lower() != cf.lower(): continue
+        if normalize(uni["field"]) != normalize(cf): continue
         if "Бесплатно" in budget and uni["cost"] != "Бесплатно": continue
         uni["score"] = score_university(uni, data)
         results.append(uni)
@@ -820,6 +820,12 @@ def quick_search_by_country(message):
     country = parts[1].strip() if len(parts) > 1 else text.strip()
     quick_show_filtered(message.chat.id, country_filter=country)
 
+def normalize(text):
+    """Убирает все пробельные символы по краям и приводит к нижнему регистру"""
+    if not text:
+        return ""
+    return " ".join(text.split()).strip().lower()
+
 def quick_show_filtered(chat_id, field_filter=None, main_field=None, country_filter=None, cost_filter=None, scholarship_filter=False):
     try:
         UNIVERSITIES = get_universities()
@@ -828,32 +834,39 @@ def quick_show_filtered(chat_id, field_filter=None, main_field=None, country_fil
         return
 
     cf = clean_field(field_filter) if field_filter else None
+    cf_norm = normalize(cf) if cf else None
 
-    # Получаем все специальности для направления (без эмодзи)
-    main_field_subs = []
+    # Получаем все специальности для направления (без эмодзи), нормализованные
+    main_field_subs_norm = []
     if main_field and main_field in FIELDS:
         for s in FIELDS[main_field]:
-            main_field_subs.append(clean_field(s))
+            main_field_subs_norm.append(normalize(clean_field(s)))
 
     results = []
     for uni in UNIVERSITIES:
         if not uni["name"]: continue
-        uni_field = uni["field"].strip()
+        uni_field_norm = normalize(uni["field"])
 
-        if cf:
-            if uni_field.lower() != cf.lower(): continue
-        elif main_field_subs:
-            if uni_field not in main_field_subs: continue
+        if cf_norm:
+            # Используем вхождение строки вместо точного равенства — надёжнее
+            if cf_norm not in uni_field_norm and uni_field_norm not in cf_norm:
+                continue
+        elif main_field_subs_norm:
+            if uni_field_norm not in main_field_subs_norm:
+                continue
 
         if country_filter:
-            if country_filter.lower() not in uni["country"].lower(): continue
+            if normalize(country_filter) not in normalize(uni["country"]):
+                continue
 
         if cost_filter:
-            if uni["cost"].strip() != cost_filter: continue
+            if normalize(uni["cost"]) != normalize(cost_filter):
+                continue
 
         if scholarship_filter:
-            s = uni["scholarship"].strip()
-            if not s or s == "Нет": continue
+            s = normalize(uni["scholarship"])
+            if not s or s == "нет":
+                continue
 
         results.append(uni)
 
