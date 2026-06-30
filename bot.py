@@ -681,13 +681,24 @@ def show_results(message):
         return
 
     results = []
+    debug_info = []
     for uni in UNIVERSITIES:
         if not uni["name"]: continue
+        if uni["field"] and normalize(uni["field"]) == normalize(cf):
+            debug_info.append(f"name={uni['name']!r} field={uni['field']!r} rf_ok={uni['rf_ok']!r} (type={type(uni['rf_ok']).__name__})")
         if is_rf and not uni["rf_ok"]: continue
         if normalize(uni["field"]) != normalize(cf): continue
         if "Бесплатно" in budget and uni["cost"] != "Бесплатно": continue
         uni["score"] = score_university(uni, data)
         results.append(uni)
+
+    if not results and debug_info:
+        debug_msg = f"DEBUG: ищу cf={cf!r}\n\nНайдены университеты с таким field ДО фильтра rf_ok:\n" + "\n".join(debug_info[:5])
+        bot.send_message(message.chat.id, debug_msg)
+    elif not results:
+        sample = [f"{u['name']}: field={u['field']!r}" for u in UNIVERSITIES if u['name']][:5]
+        debug_msg = f"DEBUG: ищу cf={cf!r}\n\nНе нашла ни одного university с таким field. Примеры из базы:\n" + "\n".join(sample)
+        bot.send_message(message.chat.id, debug_msg)
 
     results.sort(key=lambda x: x["score"], reverse=True)
     name = data.get("name", "")
