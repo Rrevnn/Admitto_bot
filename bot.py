@@ -570,6 +570,7 @@ def clean_field(text):
 
 @bot.message_handler(commands=["start"])
 def start(message):
+    bot.clear_step_handler_by_chat_id(message.chat.id)
     user_data[message.chat.id] = {}
     WAITING_FOR_UNI_SEARCH.discard(message.chat.id)
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -585,6 +586,7 @@ def start(message):
 
 @bot.message_handler(func=lambda m: m.text in ["🔍 Подобрать университеты", "🔍 Подобрать заново"])
 def ask_name(message):
+    bot.clear_step_handler_by_chat_id(message.chat.id)
     user_data[message.chat.id] = {}
     WAITING_FOR_UNI_SEARCH.discard(message.chat.id)
     bot.send_message(message.chat.id, "Отлично! Давай познакомимся 🎯\n\nКак тебя зовут?")
