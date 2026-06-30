@@ -676,8 +676,9 @@ def show_results(message):
 
     try:
         UNIVERSITIES = get_universities()
-    except:
-        bot.send_message(message.chat.id, "Ошибка загрузки базы. Попробуй позже.")
+        bot.send_message(message.chat.id, f"DEBUG: получено {len(UNIVERSITIES)} записей из Airtable")
+    except Exception as e:
+        bot.send_message(message.chat.id, f"Ошибка загрузки базы: {e}")
         return
 
     results = []
