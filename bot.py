@@ -555,6 +555,157 @@ SUBFIELDS = {
     "Специальное образование": ["♿ Инклюзивное образование", "🧩 Работа с особыми потребностями"],
 }
 
+
+EMPLOYMENT_BY_COUNTRY = {
+    "Германия": {
+        "score": "⭐⭐⭐⭐⭐",
+        "visa": "Голубая карта ЕС (Blue Card) — легкий путь к ПМЖ",
+        "salary": "€40,000–70,000/год для выпускников",
+        "market": "Острая нехватка специалистов во всех отраслях",
+        "stay": "После учёбы — 18 месяцев на поиск работы",
+    },
+    "Нидерланды": {
+        "score": "⭐⭐⭐⭐⭐",
+        "visa": "Orientation Year Visa — 1 год на поиск работы",
+        "salary": "€35,000–60,000/год",
+        "market": "Сильный рынок IT, финансов, логистики",
+        "stay": "12 месяцев на поиск работы после диплома",
+    },
+    "Чехия": {
+        "score": "⭐⭐⭐⭐",
+        "visa": "Рабочая виза после учёбы",
+        "salary": "€20,000–35,000/год",
+        "market": "Растущий IT-рынок, много международных компаний",
+        "stay": "9 месяцев на поиск работы",
+    },
+    "Венгрия": {
+        "score": "⭐⭐⭐",
+        "visa": "Рабочая виза ЕС",
+        "salary": "€15,000–25,000/год",
+        "market": "Небольшой рынок, многие уезжают в Западную Европу",
+        "stay": "Можно остаться в ЕС через другие страны",
+    },
+    "Австрия": {
+        "score": "⭐⭐⭐⭐⭐",
+        "visa": "Красно-бело-красная карта",
+        "salary": "€35,000–60,000/год",
+        "market": "Сильный рынок, высокий уровень жизни",
+        "stay": "12 месяцев на поиск работы",
+    },
+    "Сербия": {
+        "score": "⭐⭐⭐",
+        "visa": "Рабочая виза (не ЕС)",
+        "salary": "€10,000–20,000/год",
+        "market": "Небольшой рынок, но растущий IT-сектор",
+        "stay": "Многие используют как плацдарм для ЕС",
+    },
+    "Грузия": {
+        "score": "⭐⭐⭐",
+        "visa": "Без визы для РФ",
+        "salary": "€8,000–15,000/год",
+        "market": "Маленький рынок, но лёгкий старт для бизнеса",
+        "stay": "Удобная база для удалённой работы",
+    },
+    "Турция": {
+        "score": "⭐⭐⭐⭐",
+        "visa": "Рабочий ВНЖ",
+        "salary": "€12,000–25,000/год",
+        "market": "Растущая экономика, много стартапов",
+        "stay": "Активная экосистема особенно в Стамбуле",
+    },
+    "Китай": {
+        "score": "⭐⭐⭐⭐",
+        "visa": "Рабочая виза Z",
+        "salary": "€15,000–40,000/год",
+        "market": "Огромный рынок, знание китайского открывает все двери",
+        "stay": "Уникальные возможности для тех кто знает язык",
+    },
+    "Южная Корея": {
+        "score": "⭐⭐⭐⭐",
+        "visa": "D-10 visa — поиск работы после учёбы",
+        "salary": "€20,000–45,000/год",
+        "market": "Samsung, LG, Hyundai — крупные работодатели",
+        "stay": "6 месяцев на поиск работы",
+    },
+    "США": {
+        "score": "⭐⭐⭐⭐⭐",
+        "visa": "OPT — 1-3 года работы после учёбы",
+        "salary": "$60,000–120,000/год",
+        "market": "Лучший рынок для IT, финансов, науки",
+        "stay": "OPT + H-1B виза для долгосрочного остатка",
+    },
+    "Великобритания": {
+        "score": "⭐⭐⭐⭐⭐",
+        "visa": "Graduate Route — 2 года работы после учёбы",
+        "salary": "£30,000–60,000/год",
+        "market": "Лондон — финансовый центр мира",
+        "stay": "2 года без ограничений по работодателю",
+    },
+    "Польша": {
+        "score": "⭐⭐⭐",
+        "visa": "Рабочая виза ЕС",
+        "salary": "€15,000–25,000/год",
+        "market": "Растущий IT-рынок, много аутсорсинга",
+        "stay": "9 месяцев на поиск работы",
+    },
+    "Финляндия": {
+        "score": "⭐⭐⭐⭐",
+        "visa": "Job-seeker visa — 1 год",
+        "salary": "€30,000–50,000/год",
+        "market": "Nokia, Rovio — сильный tech-сектор",
+        "stay": "12 месяцев на поиск работы",
+    },
+    "Эстония": {
+        "score": "⭐⭐⭐⭐",
+        "visa": "Job-seeker visa",
+        "salary": "€20,000–40,000/год",
+        "market": "Цифровая страна — Skype, Transferwise родились здесь",
+        "stay": "9 месяцев на поиск работы",
+    },
+    "Казахстан": {
+        "score": "⭐⭐⭐",
+        "visa": "Не нужна для СНГ",
+        "salary": "€10,000–20,000/год",
+        "market": "Растущая экономика, нефтяной сектор",
+        "stay": "Легко для граждан СНГ",
+    },
+    "Армения": {
+        "score": "⭐⭐⭐",
+        "visa": "Без визы для РФ",
+        "salary": "€8,000–18,000/год",
+        "market": "Растущий IT-сектор, много стартапов",
+        "stay": "Удобная база для удалённой работы",
+    },
+    "ОАЭ": {
+        "score": "⭐⭐⭐⭐⭐",
+        "visa": "Рабочая виза",
+        "salary": "$40,000–100,000/год (без налогов!)",
+        "market": "Финансы, логистика, tech — всё есть",
+        "stay": "Продление визы через работодателя",
+    },
+    "Израиль": {
+        "score": "⭐⭐⭐⭐",
+        "visa": "Рабочая виза",
+        "salary": "$30,000–80,000/год",
+        "market": "Стартап-нация — один из лучших IT-рынков мира",
+        "stay": "Высокий спрос на tech-специалистов",
+    },
+    "Испания": {
+        "score": "⭐⭐⭐⭐",
+        "visa": "EU Blue Card",
+        "salary": "€20,000–40,000/год",
+        "market": "Туризм, IT, финансы",
+        "stay": "12 месяцев на поиск работы",
+    },
+    "Аргентина": {
+        "score": "⭐⭐",
+        "visa": "Рабочая виза",
+        "salary": "€8,000–15,000/год",
+        "market": "Нестабильная экономика, но дешёвая жизнь",
+        "stay": "Многие работают удалённо на западные компании",
+    },
+}
+
 def normalize(text):
     if not text:
         return ""
@@ -1142,6 +1293,16 @@ def handle_university_search(message):
     rf_status = "✅ Принимают" if uni["rf_ok"] else "⚠️ Уточняй на сайте"
     data = user_data.get(message.chat.id, {})
     reasons = get_match_reasons(uni, data)
+    emp = EMPLOYMENT_BY_COUNTRY.get(uni["country"], {})
+    emp_text = ""
+    if emp:
+        emp_text = (
+            f"\n💼 *Трудоустройство после учёбы* {emp.get('score', '')}\n"
+            f"Рынок: {emp.get('market', '')}\n"
+            f"Зарплата: {emp.get('salary', '')}\n"
+            f"Виза: {emp.get('visa', '')}\n"
+            f"Остаться: {emp.get('stay', '')}\n"
+        )
     response = (
         f"{uni['flag']} *{uni['name']}*\n"
         f"📍 {uni['country']} · {uni['field']}\n\n"
@@ -1149,7 +1310,8 @@ def handle_university_search(message):
         f"📋 *Поступление*\nЯзык обучения: {uni['language']}\nВступительные экзамены: {uni['exams']}\nIELTS: {uni['ielts']}\nДедлайн: {uni['deadline']}\nДлительность: {uni['duration']}\n\n"
         f"⭐ *Сильные стороны*\n{uni['strengths']}\n\n"
         f"🏠 *Жизнь*\nЖильё: {uni['housing']}\nСНГ-комьюнити: {uni['community']}\n\n"
-        f"🇷🇺 *Для граждан РФ:* {rf_status}\n"
+        f"🇷🇺 *Для граждан РФ:* {rf_status}"
+        + emp_text
     )
     if reasons:
         response += "\n🎯 *Почему подходит тебе:*\n"
@@ -1160,8 +1322,78 @@ def handle_university_search(message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add(f"📅 План поступления в {uni_name_short}")
     markup.add(f"📋 Чеклист для {uni['country']}")
+    markup.add(f"⚖️ Сравнить с другим")
     markup.add("🔍 Подобрать заново")
     user_data[message.chat.id]["last_uni"] = uni
+    # Добавляем в список сравнения
+    if "compare_list" not in user_data[message.chat.id]:
+        user_data[message.chat.id]["compare_list"] = []
     bot.send_message(message.chat.id, response, parse_mode="Markdown", reply_markup=markup)
+
+
+@bot.message_handler(func=lambda m: m.text == "⚖️ Сравнить с другим")
+def start_compare(message):
+    uni = user_data.get(message.chat.id, {}).get("last_uni")
+    if not uni:
+        bot.send_message(message.chat.id, "Сначала открой карточку университета!")
+        return
+    compare_list = user_data[message.chat.id].get("compare_list", [])
+    # Добавляем текущий если ещё нет
+    if not any(u["name"] == uni["name"] for u in compare_list):
+        compare_list.append(uni)
+        user_data[message.chat.id]["compare_list"] = compare_list
+    if len(compare_list) < 2:
+        bot.send_message(message.chat.id,
+            f"✅ *{uni['name']}* добавлен к сравнению!\n\nТеперь найди второй университет и нажми ⚖️ Сравнить с другим ещё раз.",
+            parse_mode="Markdown")
+    else:
+        show_comparison(message)
+
+def show_comparison(message):
+    compare_list = user_data.get(message.chat.id, {}).get("compare_list", [])
+    if len(compare_list) < 2:
+        bot.send_message(message.chat.id, "Добавь минимум 2 университета для сравнения!")
+        return
+
+    unis = compare_list[:3]
+    response = "⚖️ *Сравнение университетов:*\n\n"
+
+    fields_to_compare = [
+        ("🌍 Страна", "country"),
+        ("💰 Стоимость", "cost"),
+        ("🎓 Стипендия", "scholarship"),
+        ("🗣️ Язык", "language"),
+        ("📝 IELTS", "ielts"),
+        ("📅 Дедлайн", "deadline"),
+        ("⏱ Длительность", "duration"),
+        ("🏠 Жильё", "housing"),
+        ("✍️ Экзамены", "exams"),
+    ]
+
+    # Заголовки
+    headers = " | ".join([f"*{u['name'][:15]}*" for u in unis])
+    response += headers + "\n" + "—" * 30 + "\n"
+
+    for label, key in fields_to_compare:
+        values = [u.get(key, "—")[:25] for u in unis]
+        response += f"\n{label}:\n"
+        for i, (uni, val) in enumerate(zip(unis, values)):
+            response += f"  {uni['flag']} {val}\n"
+
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    markup.add("🗑 Очистить сравнение")
+    markup.add("🔍 Подобрать заново", "📋 Чеклист документов")
+    user_data[message.chat.id]["compare_list"] = []
+    bot.send_message(message.chat.id, response, parse_mode="Markdown", reply_markup=markup)
+
+@bot.message_handler(func=lambda m: m.text == "🗑 Очистить сравнение")
+def clear_comparison(message):
+    user_data[message.chat.id]["compare_list"] = []
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    markup.add("🔍 Подобрать университеты")
+    markup.add("🔎 Быстрый поиск")
+    markup.add("📋 Чеклист документов")
+    bot.send_message(message.chat.id, "Список сравнения очищен! Начни заново.", reply_markup=markup)
+
 
 bot.infinity_polling()
