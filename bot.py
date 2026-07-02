@@ -1274,14 +1274,22 @@ def show_admission_plan(message):
     markup.add("🔍 Подобрать заново", "📋 Чеклист документов")
     bot.send_message(message.chat.id, plan, parse_mode="Markdown", reply_markup=markup)
 
-@bot.message_handler(func=lambda m: m.chat.id in WAITING_FOR_UNI_SEARCH)
+SKIP_TEXTS = [
+    "🔍 Подобрать университеты", "🔍 Подобрать заново", "📋 Чеклист документов",
+    "🔎 Быстрый поиск", "🔄 Сменить специальность", "🔄 Сменить направление",
+    "💰 Расширить бюджет", "🔍 Начать заново", "🔙 Назад",
+    "⚖️ Сравнить с другим", "🗑 Очистить сравнение",
+]
+
+@bot.message_handler(func=lambda m: (
+    m.chat.id in WAITING_FOR_UNI_SEARCH and
+    m.text and
+    not m.text.startswith("/") and
+    m.text not in SKIP_TEXTS and
+    not m.text.startswith("📅") and
+    not m.text.startswith("📋 Чеклист для")
+))
 def handle_university_search(message):
-    if message.text.startswith("/"): return
-    skip = ["🔍 Подобрать университеты", "🔍 Подобрать заново", "📋 Чеклист документов",
-            "🔎 Быстрый поиск", "🔄 Сменить специальность", "🔄 Сменить направление",
-            "💰 Расширить бюджет", "🔍 Начать заново", "🔙 Назад"]
-    if message.text in skip or message.text.startswith("📅") or message.text.startswith("📋 Чеклист для"):
-        return
     query = message.text.lower()
     found = [u for u in UNIVERSITIES if query in u["name"].lower()]
     if not found:
