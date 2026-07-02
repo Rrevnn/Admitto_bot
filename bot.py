@@ -1277,9 +1277,10 @@ def show_admission_plan(message):
 @bot.message_handler(func=lambda m: m.chat.id in WAITING_FOR_UNI_SEARCH)
 def handle_university_search(message):
     if message.text.startswith("/"): return
-    skip = ["🔍 Подобрать университеты", "🔍 Подобрать заново", "📋 Чеклист документов",
-            "🔎 Быстрый поиск", "🔄 Сменить специальность", "🔄 Сменить направление",
-            "💰 Расширить бюджет", "🔍 Начать заново", "🔙 Назад"]
+   skip = ["🔍 Подобрать университеты", "🔍 Подобрать заново", "📋 Чеклист документов",
+        "🔎 Быстрый поиск", "🔄 Сменить специальность", "🔄 Сменить направление",
+        "💰 Расширить бюджет", "🔍 Начать заново", "🔙 Назад",
+        "⚖️ Сравнить с другим", "🗑 Очистить сравнение"]
     if message.text in skip or message.text.startswith("📅") or message.text.startswith("📋 Чеклист для"):
         return
     query = message.text.lower()
