@@ -793,6 +793,7 @@ def start(message):
     markup.add("🔍 Подобрать университеты")
     markup.add("🔎 Быстрый поиск")
     markup.add("📋 Чеклист документов")
+    markup.add("💬 Чат для поступающих")
     bot.send_message(message.chat.id,
         f"Привет, {message.from_user.first_name}! 👋\n\n"
         "Я Viamo — твой помощник по поступлению за рубеж.\n\n"
@@ -1541,11 +1542,31 @@ def show_stats(message):
     response += "\n⚠️ _Статистика сбрасывается при перезапуске бота. Постоянные данные — в Google Sheets._"
     bot.send_message(message.chat.id, response, parse_mode="Markdown")
 
+
+@bot.message_handler(func=lambda m: m.text == "💬 Чат для поступающих")
+def show_community_chat(message):
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    markup.add("🔍 Подобрать университеты")
+    markup.add("🔎 Быстрый поиск")
+    markup.add("📋 Чеклист документов")
+    markup.add("💬 Чат для поступающих")
+    bot.send_message(message.chat.id,
+        "💬 *Сообщество поступающих за рубеж*\n\n"
+        "Присоединяйся к чату где собрались такие же как ты — те кто планирует или уже поступает в университеты за рубежом!\n\n"
+        "Там можно:\n"
+        "— найти единомышленников\n"
+        "— задать вопросы тем кто уже учится\n"
+        "— поделиться своим опытом\n"
+        "— получить поддержку\n\n"
+        "👉 https://t.me/Cvoi_Abroad",
+        parse_mode="Markdown",
+        reply_markup=markup)
+
 SKIP_TEXTS = [
     "🔍 Подобрать университеты", "🔍 Подобрать заново", "📋 Чеклист документов",
     "🔎 Быстрый поиск", "🔄 Сменить специальность", "🔄 Сменить направление",
     "💰 Расширить бюджет", "🔍 Начать заново", "🔙 Назад",
-    "⚖️ Сравнить с другим", "🗑 Очистить сравнение",
+    "⚖️ Сравнить с другим", "🗑 Очистить сравнение", "💬 Чат для поступающих",
 ]
 
 @bot.message_handler(func=lambda m: (
