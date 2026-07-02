@@ -752,20 +752,24 @@ def ask_age(message):
     bot.register_next_step_handler(message, ask_grade_or_status)
 
 def ask_grade_or_status(message):
+    if message.chat.id in user_data: user_data[message.chat.id]["current_step"] = "ask_grade_or_status"
     user_data[message.chat.id]["age"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     if message.text == "До 18":
         markup.add("8 класс", "9 класс")
         markup.add("10 класс", "11 класс")
         markup.add("Другое")
+        markup.add("↩️ Назад")
         bot.send_message(message.chat.id, "В каком классе ты сейчас?", reply_markup=markup)
     else:
         markup.add("🎓 Студент", "📄 Выпускник")
         markup.add("💼 Работаю", "Другое")
+        markup.add("↩️ Назад")
         bot.send_message(message.chat.id, "Кто ты сейчас?", reply_markup=markup)
     bot.register_next_step_handler(message, ask_citizenship)
 
 def ask_citizenship(message):
+    if message.chat.id in user_data: user_data[message.chat.id]["current_step"] = "ask_citizenship"
     user_data[message.chat.id]["age_or_grade"] = message.text
     user_data[message.chat.id]["status"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -773,29 +777,35 @@ def ask_citizenship(message):
     markup.add("🇺🇿 Узбекистан", "🇺🇦 Украина")
     markup.add("🇦🇿 Азербайджан", "🇧🇾 Беларусь")
     markup.add("🇬🇪 Грузия", "Другое")
+    markup.add("↩️ Назад")
     bot.send_message(message.chat.id, "Твоё гражданство?", reply_markup=markup)
     bot.register_next_step_handler(message, ask_gpa)
 
 def ask_gpa(message):
+    if message.chat.id in user_data: user_data[message.chat.id]["current_step"] = "ask_gpa"
     user_data[message.chat.id]["citizenship"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("⭐⭐⭐⭐⭐ Отлично (4.5–5)")
     markup.add("⭐⭐⭐⭐ Хорошо (3.5–4.5)")
     markup.add("⭐⭐⭐ Удовлетворительно")
+    markup.add("↩️ Назад")
     bot.send_message(message.chat.id, "Твой средний балл?", reply_markup=markup)
     bot.register_next_step_handler(message, ask_achievements)
 
 def ask_achievements(message):
+    if message.chat.id in user_data: user_data[message.chat.id]["current_step"] = "ask_achievements"
     user_data[message.chat.id]["gpa"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("🏆 Международные олимпиады")
     markup.add("🥇 Национальные олимпиады")
     markup.add("📚 Школьные / университетские")
     markup.add("➖ Пока нет")
+    markup.add("↩️ Назад")
     bot.send_message(message.chat.id, "Есть ли у тебя академические достижения?", reply_markup=markup)
     bot.register_next_step_handler(message, ask_achievements_detail)
 
 def ask_achievements_detail(message):
+    if message.chat.id in user_data: user_data[message.chat.id]["current_step"] = "ask_achievements_detail"
     user_data[message.chat.id]["achievements"] = message.text
     if "➖" in message.text:
         user_data[message.chat.id]["achievements_detail"] = ""
@@ -818,22 +828,27 @@ def process_achievements_detail(message):
     ask_english(message)
 
 def ask_english(message):
+    if message.chat.id in user_data: user_data[message.chat.id]["current_step"] = "ask_english"
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("🔴 A1–A2", "🟡 B1–B2")
     markup.add("🟢 C1", "⭐ C2")
+    markup.add("↩️ Назад")
     bot.send_message(message.chat.id, "Уровень английского?", reply_markup=markup)
     bot.register_next_step_handler(message, ask_certificate)
 
 def ask_certificate(message):
+    if message.chat.id in user_data: user_data[message.chat.id]["current_step"] = "ask_certificate"
     user_data[message.chat.id]["english"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("✅ IELTS", "✅ TOEFL")
     markup.add("✅ Goethe / TestDaF", "✅ DELF / DALF")
     markup.add("📅 Планирую сдать", "➖ Нет")
+    markup.add("↩️ Назад")
     bot.send_message(message.chat.id, "Языковые сертификаты?", reply_markup=markup)
     bot.register_next_step_handler(message, ask_other_language)
 
 def ask_other_language(message):
+    if message.chat.id in user_data: user_data[message.chat.id]["current_step"] = "ask_other_language"
     user_data[message.chat.id]["certificate"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("🇩🇪 Немецкий", "🇫🇷 Французский")
@@ -847,6 +862,7 @@ def ask_other_language(message):
     bot.register_next_step_handler(message, ask_other_language_level)
 
 def ask_other_language_level(message):
+    if message.chat.id in user_data: user_data[message.chat.id]["current_step"] = "ask_other_language_level"
     user_data[message.chat.id]["other_language"] = message.text
     if "➖" in message.text:
         user_data[message.chat.id]["other_language_level"] = "Нет"
@@ -854,16 +870,19 @@ def ask_other_language_level(message):
         markup.add("✅ Есть, действующий")
         markup.add("⚠️ Скоро истечёт")
         markup.add("❌ Нет")
+        markup.add("↩️ Назад")
         bot.send_message(message.chat.id, "Загранпаспорт?", reply_markup=markup)
         bot.register_next_step_handler(message, ask_visa)
         return
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("🔴 Начинающий (A1–A2)", "🟡 Средний (B1–B2)")
     markup.add("🟢 Продвинутый (C1)", "⭐ Свободно (C2)")
+    markup.add("↩️ Назад")
     bot.send_message(message.chat.id, f"Какой уровень {message.text}?", reply_markup=markup)
     bot.register_next_step_handler(message, ask_passport)
 
 def ask_passport(message):
+    if message.chat.id in user_data: user_data[message.chat.id]["current_step"] = "ask_passport"
     user_data[message.chat.id]["other_language_level"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("✅ Есть, действующий")
@@ -873,85 +892,104 @@ def ask_passport(message):
     bot.register_next_step_handler(message, ask_visa)
 
 def ask_visa(message):
+    if message.chat.id in user_data: user_data[message.chat.id]["current_step"] = "ask_visa"
     user_data[message.chat.id]["passport"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("➖ Нет опыта", "✈️ Туристические")
     markup.add("🎓 Студенческие", "⚠️ Были отказы")
+    markup.add("↩️ Назад")
     bot.send_message(message.chat.id, "Опыт получения виз?", reply_markup=markup)
     bot.register_next_step_handler(message, ask_hobbies)
 
 def ask_hobbies(message):
+    if message.chat.id in user_data: user_data[message.chat.id]["current_step"] = "ask_hobbies"
     user_data[message.chat.id]["visa"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("⚽ Спорт", "🎵 Музыка")
     markup.add("💻 Технологии", "🎨 Искусство")
     markup.add("📚 Наука / чтение", "🤝 Волонтёрство")
     markup.add("💼 Бизнес", "✈️ Путешествия")
+    markup.add("↩️ Назад")
     bot.send_message(message.chat.id, "Твои главные увлечения?", reply_markup=markup)
     bot.register_next_step_handler(message, ask_personality)
 
 def ask_personality(message):
+    if message.chat.id in user_data: user_data[message.chat.id]["current_step"] = "ask_personality"
     user_data[message.chat.id]["hobbies"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("🧩 Интроверт")
     markup.add("🌟 Экстраверт")
     markup.add("⚖️ Посередине")
+    markup.add("↩️ Назад")
     bot.send_message(message.chat.id, "Как бы ты описал себя?", reply_markup=markup)
     bot.register_next_step_handler(message, ask_stress)
 
 def ask_stress(message):
+    if message.chat.id in user_data: user_data[message.chat.id]["current_step"] = "ask_stress"
     user_data[message.chat.id]["personality"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("💡 Ищу решение", "🤝 Прошу помощи")
     markup.add("🎮 Отвлекаюсь", "🔒 Замыкаюсь")
+    markup.add("↩️ Назад")
     bot.send_message(message.chat.id, "Как реагируешь на стресс?", reply_markup=markup)
     bot.register_next_step_handler(message, ask_leadership)
 
 def ask_leadership(message):
+    if message.chat.id in user_data: user_data[message.chat.id]["current_step"] = "ask_leadership"
     user_data[message.chat.id]["stress"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("🦁 Беру инициативу")
     markup.add("🤝 Поддерживаю команду")
     markup.add("🎯 Работаю самостоятельно")
+    markup.add("↩️ Назад")
     bot.send_message(message.chat.id, "В команде ты чаще...", reply_markup=markup)
     bot.register_next_step_handler(message, ask_goal)
 
 def ask_goal(message):
+    if message.chat.id in user_data: user_data[message.chat.id]["current_step"] = "ask_goal"
     user_data[message.chat.id]["leadership"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("🌍 Остаться за рубежом")
     markup.add("🏠 Вернуться домой")
     markup.add("🤷 Пока не знаю")
+    markup.add("↩️ Назад")
     bot.send_message(message.chat.id, "Что планируешь после учёбы?", reply_markup=markup)
     bot.register_next_step_handler(message, ask_career)
 
 def ask_career(message):
+    if message.chat.id in user_data: user_data[message.chat.id]["current_step"] = "ask_career"
     user_data[message.chat.id]["goal"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("💻 IT / Стартап", "🏢 Корпорация")
     markup.add("🚀 Своё дело", "🔬 Наука")
     markup.add("🌱 Социальные проекты")
+    markup.add("↩️ Назад")
     bot.send_message(message.chat.id, "Карьерная цель?", reply_markup=markup)
     bot.register_next_step_handler(message, ask_priority)
 
 def ask_priority(message):
+    if message.chat.id in user_data: user_data[message.chat.id]["current_step"] = "ask_priority"
     user_data[message.chat.id]["career"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("🏆 Рейтинг вуза", "💰 Стоимость")
     markup.add("🌍 Страна", "💼 Трудоустройство")
     markup.add("🏙️ Город и жизнь", "🔒 Безопасность")
+    markup.add("↩️ Назад")
     bot.send_message(message.chat.id, "Что важнее при выборе университета?", reply_markup=markup)
     bot.register_next_step_handler(message, ask_main_field)
 
 def ask_main_field(message):
+    if message.chat.id in user_data: user_data[message.chat.id]["current_step"] = "ask_main_field"
     user_data[message.chat.id]["priority"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     for f in FIELDS.keys():
         markup.add(f)
+    markup.add("↩️ Назад")
     bot.send_message(message.chat.id, "Почти готово! 🎯\n\nВыбери направление учёбы:", reply_markup=markup)
     bot.register_next_step_handler(message, ask_sub_field)
 
 def ask_sub_field(message):
+    if message.chat.id in user_data: user_data[message.chat.id]["current_step"] = "ask_sub_field"
     main_field = message.text
     if main_field not in FIELDS:
         bot.send_message(message.chat.id, "Пожалуйста выбери направление из списка")
@@ -961,10 +999,12 @@ def ask_sub_field(message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     for sub in FIELDS[main_field]:
         markup.add(sub)
+    markup.add("↩️ Назад")
     bot.send_message(message.chat.id, "Уточни специальность:", reply_markup=markup)
     bot.register_next_step_handler(message, ask_sub_subfield)
 
 def ask_sub_subfield(message):
+    if message.chat.id in user_data: user_data[message.chat.id]["current_step"] = "ask_sub_subfield"
     sub_field = message.text
     user_data[message.chat.id]["field"] = sub_field
     cf = clean_field(sub_field)
@@ -974,12 +1014,14 @@ def ask_sub_subfield(message):
         for s in subfields:
             markup.add(s)
         markup.add("➖ Любое направление")
+        markup.add("↩️ Назад")
         bot.send_message(message.chat.id, f"Уточни направление в рамках {cf}:", reply_markup=markup)
         bot.register_next_step_handler(message, ask_budget)
     else:
         ask_budget(message)
 
 def ask_budget(message):
+    if message.chat.id in user_data: user_data[message.chat.id]["current_step"] = "ask_budget"
     if "subfield" not in user_data[message.chat.id]:
         user_data[message.chat.id]["subfield"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -987,6 +1029,7 @@ def ask_budget(message):
     markup.add("💛 До €5,000 в год")
     markup.add("🧡 До €15,000 в год")
     markup.add("❤️ Бюджет не ограничен")
+    markup.add("↩️ Назад")
     bot.send_message(message.chat.id, "Бюджет на обучение в год?", reply_markup=markup)
     bot.register_next_step_handler(message, show_results)
 
@@ -1066,6 +1109,7 @@ def show_results(message):
                 msg += f"{item}\n"
             msg += "\n"
         msg += "Что изменим?"
+        markup.add("↩️ Назад")
         bot.send_message(message.chat.id, msg, parse_mode="Markdown", reply_markup=markup)
         WAITING_FOR_UNI_SEARCH.discard(message.chat.id)
         return
@@ -1082,6 +1126,7 @@ def show_results(message):
 
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("🔍 Подобрать заново", "📋 Чеклист документов")
+    markup.add("↩️ Назад")
     bot.send_message(message.chat.id, response, parse_mode="Markdown", reply_markup=markup)
     WAITING_FOR_UNI_SEARCH.add(message.chat.id)
 
@@ -1090,6 +1135,7 @@ def change_speciality(message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     for f in FIELDS.keys():
         markup.add(f)
+    markup.add("↩️ Назад")
     bot.send_message(message.chat.id, "Выбери новое направление:", reply_markup=markup)
     bot.register_next_step_handler(message, ask_sub_field)
 
@@ -1100,6 +1146,7 @@ def change_direction(message):
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         for sub in FIELDS[main_field]:
             markup.add(sub)
+        markup.add("↩️ Назад")
         bot.send_message(message.chat.id, "Выбери другое направление:", reply_markup=markup)
         bot.register_next_step_handler(message, ask_sub_subfield)
     else:
@@ -1111,6 +1158,7 @@ def expand_budget(message):
     markup.add("💛 До €5,000 в год")
     markup.add("🧡 До €15,000 в год")
     markup.add("❤️ Бюджет не ограничен")
+    markup.add("↩️ Назад")
     bot.send_message(message.chat.id, "Выбери новый бюджет:", reply_markup=markup)
     bot.register_next_step_handler(message, show_results)
 
@@ -1121,6 +1169,7 @@ def quick_search(message):
     markup.add("📚 По направлению", "🌍 По стране")
     markup.add("💰 Бесплатные", "🎓 Со стипендией")
     markup.add("🔙 Назад")
+    markup.add("↩️ Назад")
     bot.send_message(message.chat.id, "Как хочешь искать?", reply_markup=markup)
     bot.register_next_step_handler(message, quick_search_filter)
 
@@ -1129,6 +1178,7 @@ def quick_search_filter(message):
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         for f in FIELDS.keys():
             markup.add(f)
+        markup.add("↩️ Назад")
         bot.send_message(message.chat.id, "Выбери направление:", reply_markup=markup)
         bot.register_next_step_handler(message, quick_search_by_main_field)
     elif message.text == "🌍 По стране":
@@ -1140,6 +1190,7 @@ def quick_search_filter(message):
         markup.add("🇰🇷 Южная Корея", "🇺🇸 США")
         markup.add("🇬🇧 Великобритания", "🇦🇲 Армения")
         markup.add("🇦🇹 Австрия", "🇰🇿 Казахстан")
+        markup.add("↩️ Назад")
         bot.send_message(message.chat.id, "Выбери страну:", reply_markup=markup)
         bot.register_next_step_handler(message, quick_search_by_country)
     elif message.text == "💰 Бесплатные":
@@ -1215,6 +1266,7 @@ def quick_show_filtered(chat_id, field_filter=None, main_field=None, country_fil
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         markup.add("🔎 Быстрый поиск", "🔍 Подобрать университеты")
         label = cf or country_filter or ("бесплатные" if cost_filter else "со стипендией")
+        markup.add("↩️ Назад")
         bot.send_message(chat_id,
             f"Не нашла университетов по *{label}* 😔\n\nПопробуй другой фильтр!",
             parse_mode="Markdown", reply_markup=markup)
@@ -1232,6 +1284,7 @@ def quick_show_filtered(chat_id, field_filter=None, main_field=None, country_fil
 
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("🔎 Быстрый поиск", "🔍 Подобрать университеты")
+    markup.add("↩️ Назад")
     bot.send_message(chat_id, response, parse_mode="Markdown", reply_markup=markup)
     WAITING_FOR_UNI_SEARCH.add(chat_id)
 
@@ -1243,6 +1296,7 @@ def checklist(message):
     markup.add("🇭🇺 Венгрия", "🇨🇿 Чехия")
     markup.add("🇷🇸 Сербия", "🇬🇪 Грузия")
     markup.add("🇹🇷 Турция", "🇨🇳 Китай")
+    markup.add("↩️ Назад")
     bot.send_message(message.chat.id, "Для какой страны нужен чеклист?", reply_markup=markup)
     bot.register_next_step_handler(message, show_checklist)
 
@@ -1260,6 +1314,7 @@ def show_checklist(message):
     text = checklists.get(message.text, "Пока нет чеклиста для этой страны. Скоро добавим!")
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("🔍 Подобрать университеты", "📋 Чеклист документов")
+    markup.add("↩️ Назад")
     bot.send_message(message.chat.id, text, parse_mode="Markdown", reply_markup=markup)
 
 @bot.message_handler(func=lambda m: m.text and m.text.startswith("📅 План поступления"))
@@ -1267,12 +1322,117 @@ def show_admission_plan(message):
     data = user_data.get(message.chat.id, {})
     uni = data.get("last_uni")
     if not uni:
+        markup.add("↩️ Назад")
         bot.send_message(message.chat.id, "Сначала выбери университет из списка!")
         return
     plan = get_admission_plan(uni, data)
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("🔍 Подобрать заново", "📋 Чеклист документов")
+    markup.add("↩️ Назад")
     bot.send_message(message.chat.id, plan, parse_mode="Markdown", reply_markup=markup)
+
+
+# Маппинг шагов для кнопки назад
+STEP_BACK_MAP = {
+    'ask_grade_or_status': 'ask_name',
+    'ask_citizenship': 'ask_name',
+    'ask_gpa': 'ask_citizenship',
+    'ask_achievements': 'ask_gpa',
+    'ask_achievements_detail': 'ask_achievements',
+    'ask_english': 'ask_achievements',
+    'ask_certificate': 'ask_english',
+    'ask_other_language': 'ask_certificate',
+    'ask_other_language_level': 'ask_other_language',
+    'ask_passport': 'ask_other_language',
+    'ask_visa': 'ask_passport',
+    'ask_hobbies': 'ask_visa',
+    'ask_personality': 'ask_hobbies',
+    'ask_stress': 'ask_personality',
+    'ask_leadership': 'ask_stress',
+    'ask_goal': 'ask_leadership',
+    'ask_career': 'ask_goal',
+    'ask_priority': 'ask_career',
+    'ask_main_field': 'ask_priority',
+    'ask_sub_field': 'ask_main_field',
+    'ask_sub_subfield': 'ask_sub_field',
+    'ask_budget': 'ask_sub_subfield',
+}
+
+@bot.message_handler(func=lambda m: m.text == "↩️ Назад")
+def go_back(message):
+    data = user_data.get(message.chat.id, {})
+    current_step = data.get('current_step', '')
+    
+    if not current_step or current_step not in STEP_BACK_MAP:
+        # Возвращаем в главное меню
+        start(message)
+        return
+    
+    prev_step_name = STEP_BACK_MAP[current_step]
+    
+    # Удаляем данные текущего шага
+    step_data_keys = {
+        'ask_grade_or_status': 'age',
+        'ask_citizenship': 'age_or_grade',
+        'ask_gpa': 'citizenship',
+        'ask_achievements': 'gpa',
+        'ask_achievements_detail': 'achievements',
+        'ask_english': 'achievements_detail',
+        'ask_certificate': 'english',
+        'ask_other_language': 'certificate',
+        'ask_other_language_level': 'other_language',
+        'ask_passport': 'other_language_level',
+        'ask_visa': 'passport',
+        'ask_hobbies': 'visa',
+        'ask_personality': 'hobbies',
+        'ask_stress': 'personality',
+        'ask_leadership': 'stress',
+        'ask_goal': 'leadership',
+        'ask_career': 'goal',
+        'ask_priority': 'career',
+        'ask_main_field': 'priority',
+        'ask_sub_field': 'main_field',
+        'ask_sub_subfield': 'field',
+        'ask_budget': 'subfield',
+    }
+    
+    # Удаляем данные текущего и предыдущего шага чтобы вернуться чисто
+    key_to_remove = step_data_keys.get(current_step)
+    if key_to_remove and key_to_remove in data:
+        del data[key_to_remove]
+    
+    bot.clear_step_handler_by_chat_id(message.chat.id)
+    
+    # Вызываем предыдущую функцию
+    prev_func_map = {
+        'ask_name': ask_name,
+        'ask_age': ask_age,
+        'ask_citizenship': ask_citizenship,
+        'ask_gpa': ask_gpa,
+        'ask_achievements': ask_achievements,
+        'ask_english': ask_english,
+        'ask_certificate': ask_certificate,
+        'ask_other_language': ask_other_language,
+        'ask_other_language_level': ask_other_language_level,
+        'ask_passport': ask_passport,
+        'ask_visa': ask_visa,
+        'ask_hobbies': ask_hobbies,
+        'ask_personality': ask_personality,
+        'ask_stress': ask_stress,
+        'ask_leadership': ask_leadership,
+        'ask_goal': ask_goal,
+        'ask_career': ask_career,
+        'ask_priority': ask_priority,
+        'ask_main_field': ask_main_field,
+        'ask_sub_field': ask_sub_field,
+        'ask_sub_subfield': ask_sub_subfield,
+    }
+    
+    prev_func = prev_func_map.get(prev_step_name)
+    if prev_func:
+        prev_func(message)
+    else:
+        start(message)
 
 SKIP_TEXTS = [
     "🔍 Подобрать университеты", "🔍 Подобрать заново", "📋 Чеклист документов",
@@ -1295,6 +1455,7 @@ def handle_university_search(message):
     if not found:
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         markup.add("🔍 Подобрать университеты", "📋 Чеклист документов")
+        markup.add("↩️ Назад")
         bot.send_message(message.chat.id, "Не нашла такой университет 😔\n\nПроверь название или напиши /start.", reply_markup=markup)
         return
     uni = found[0]
@@ -1343,6 +1504,7 @@ def handle_university_search(message):
 def start_compare(message):
     uni = user_data.get(message.chat.id, {}).get("last_uni")
     if not uni:
+        markup.add("↩️ Назад")
         bot.send_message(message.chat.id, "Сначала открой карточку университета!")
         return
     compare_list = user_data[message.chat.id].get("compare_list", [])
@@ -1401,6 +1563,7 @@ def clear_comparison(message):
     markup.add("🔍 Подобрать университеты")
     markup.add("🔎 Быстрый поиск")
     markup.add("📋 Чеклист документов")
+    markup.add("↩️ Назад")
     bot.send_message(message.chat.id, "Список сравнения очищен! Начни заново.", reply_markup=markup)
 
 
