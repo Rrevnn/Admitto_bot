@@ -1,6 +1,69 @@
 import telebot
 from telebot import types
 import os
+import json
+import datetime
+
+# Google Sheets
+try:
+    import gspread
+    from google.oauth2.service_account import Credentials
+    SHEETS_AVAILABLE = True
+except ImportError:
+    SHEETS_AVAILABLE = False
+
+def get_sheets_client():
+    if not SHEETS_AVAILABLE:
+        return None
+    try:
+        creds_json = os.environ.get('GOOGLE_SHEETS_CREDS')
+        if not creds_json:
+            return None
+        creds_dict = json.loads(creds_json)
+        scopes = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+        creds = Credentials.from_service_account_info(creds_dict, scopes=scopes)
+        return gspread.authorize(creds)
+    except Exception as e:
+        print(f"Sheets error: {e}")
+        return None
+
+def log_to_sheets(chat_id, name="", citizenship="", field="", completed=False):
+    try:
+        client = get_sheets_client()
+        if not client:
+            return
+        sheet_id = os.environ.get('GOOGLE_SHEET_ID')
+        if not sheet_id:
+            return
+        sheet = client.open_by_key(sheet_id).sheet1
+        now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+        sheet.append_row([now, str(chat_id), name, citizenship, field, "да" if completed else "нет"])
+    except Exception as e:
+        print(f"Sheets log error: {e}")
+
+# Простая статистика в памяти
+STATS = {
+    "total_users": set(),
+    "completed": 0,
+    "citizenships": {},
+    "fields": {},
+    "started_today": set(),
+    "today": datetime.date.today().isoformat(),
+}
+
+def update_stats(chat_id, citizenship="", field="", completed=False):
+    today = datetime.date.today().isoformat()
+    if STATS["today"] != today:
+        STATS["today"] = today
+        STATS["started_today"] = set()
+    STATS["total_users"].add(chat_id)
+    STATS["started_today"].add(chat_id)
+    if citizenship:
+        STATS["citizenships"][citizenship] = STATS["citizenships"].get(citizenship, 0) + 1
+    if field:
+        STATS["fields"][field] = STATS["fields"].get(field, 0) + 1
+    if completed:
+        STATS["completed"] += 1
 
 TOKEN = os.environ.get('BOT_TOKEN')
 bot = telebot.TeleBot(TOKEN)
@@ -724,6 +787,8 @@ def start(message):
     bot.clear_step_handler_by_chat_id(message.chat.id)
     user_data[message.chat.id] = {}
     WAITING_FOR_UNI_SEARCH.discard(message.chat.id)
+    update_stats(message.chat.id)
+    log_to_sheets(message.chat.id, name=message.from_user.first_name or "")
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("🔍 Подобрать университеты")
     markup.add("🔎 Быстрый поиск")
@@ -1076,6 +1141,17 @@ def show_results(message):
     cf = clean_field(field)
 
     bot.send_message(message.chat.id, "⏳ Анализирую твой профиль...")
+
+    # Записываем статистику
+    update_stats(message.chat.id,
+        citizenship=data.get("citizenship", ""),
+        field=cf,
+        completed=True)
+    log_to_sheets(message.chat.id,
+        name=data.get("name", ""),
+        citizenship=data.get("citizenship", ""),
+        field=cf,
+        completed=True)
 
     results = []
     for uni in UNIVERSITIES:
@@ -1433,6 +1509,37 @@ def go_back(message):
         prev_func(message)
     else:
         start(message)
+
+
+@bot.message_handler(commands=["stats"])
+def show_stats(message):
+    total = len(STATS["total_users"])
+    today = len(STATS["started_today"])
+    completed = STATS["completed"]
+
+    top_citizenships = sorted(STATS["citizenships"].items(), key=lambda x: x[1], reverse=True)[:5]
+    top_fields = sorted(STATS["fields"].items(), key=lambda x: x[1], reverse=True)[:5]
+
+    response = (
+        f"📊 *Статистика Viamo*\n\n"
+        f"👥 Всего пользователей: *{total}*\n"
+        f"📅 Сегодня: *{today}*\n"
+        f"✅ Завершили анкету: *{completed}*\n\n"
+    )
+
+    if top_citizenships:
+        response += "*🌍 Топ гражданств:*\n"
+        for c, n in top_citizenships:
+            response += f"  {c}: {n}\n"
+        response += "\n"
+
+    if top_fields:
+        response += "*📚 Топ направлений:*\n"
+        for f, n in top_fields:
+            response += f"  {f}: {n}\n"
+
+    response += "\n⚠️ _Статистика сбрасывается при перезапуске бота. Постоянные данные — в Google Sheets._"
+    bot.send_message(message.chat.id, response, parse_mode="Markdown")
 
 SKIP_TEXTS = [
     "🔍 Подобрать университеты", "🔍 Подобрать заново", "📋 Чеклист документов",
