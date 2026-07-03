@@ -931,14 +931,18 @@ def show_results(message):
     log_to_sheets(message.chat.id, name=data.get("name", ""), citizenship=citizenship, field=cf, completed=True)
 
     results = []
-    for uni in UNIVERSITIES:
-        if not uni["name"]: continue
-        if is_rf and not uni["rf_ok"]: continue
-        if normalize(uni["field"]) != normalize(cf): continue
-        if "Бесплатно" in budget and uni["cost"] != "Бесплатно": continue
-        uni_copy = dict(uni)
-        uni_copy["score"] = score_university(uni, data)
-        results.append(uni_copy)
+    try:
+        for uni in UNIVERSITIES:
+            if not uni["name"]: continue
+            if is_rf and not uni["rf_ok"]: continue
+            if normalize(uni["field"]) != normalize(cf): continue
+            if "Бесплатно" in budget and uni["cost"] != "Бесплатно": continue
+            uni_copy = dict(uni)
+            uni_copy["score"] = score_university(uni, data)
+            results.append(uni_copy)
+    except Exception as e:
+        bot.send_message(message.chat.id, f"Ошибка: {e}\ncf={cf!r}, budget={budget!r}")
+        return
 
     results.sort(key=lambda x: x["score"], reverse=True)
     name = data.get("name", "")
@@ -946,9 +950,13 @@ def show_results(message):
     subfield = data.get("subfield", "")
     time_type, time_label = get_time_to_enroll(data)
 
-    bot.send_message(message.chat.id,
-        f"✨ *Твой профиль готов, {name}!*\n\n{profile_type}\n_{profile_desc}_\n\n⏱ До поступления: {time_label}",
-        parse_mode="Markdown")
+    try:
+        bot.send_message(message.chat.id,
+            f"✨ *Твой профиль готов, {name}!*\n\n{profile_type}\n_{profile_desc}_\n\n⏱ До поступления: {time_label}",
+            parse_mode="Markdown")
+    except Exception as e:
+        bot.send_message(message.chat.id, f"Ошибка профиля: {e}")
+        return
 
     if not results:
         missing = get_missing_requirements(data, budget)
@@ -976,7 +984,11 @@ def show_results(message):
 
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("🔍 Подобрать заново", "📋 Чеклист документов")
-    bot.send_message(message.chat.id, response, parse_mode="Markdown", reply_markup=markup)
+    try:
+        bot.send_message(message.chat.id, response, parse_mode="Markdown", reply_markup=markup)
+    except Exception as e:
+        # Если Markdown не работает - отправляем без форматирования
+        bot.send_message(message.chat.id, response.replace("*", "").replace("_", ""), reply_markup=markup)
     WAITING_FOR_UNI_SEARCH.add(message.chat.id)
 
 @bot.message_handler(func=lambda m: m.text == "🔄 Сменить специальность")
