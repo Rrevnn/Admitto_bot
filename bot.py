@@ -831,14 +831,21 @@ STEP_BACK_MAP = {
 @bot.message_handler(func=lambda m: m.text == "↩️ Назад")
 def go_back(message):
     data = user_data.get(message.chat.id, {})
-    current_step = data.get('prev_step', '') or data.get('current_step', '')
+    history = data.get('step_history', [])
     
-    if not current_step or current_step not in STEP_BACK_MAP:
-        # Возвращаем в главное меню
+    # Убираем текущий шаг из истории
+    if history:
+        history.pop()
+    
+    # Если история пустая — в главное меню
+    if not history:
         start(message)
         return
     
-    prev_step_name = STEP_BACK_MAP[current_step]
+    prev_step_name = history[-1]
+    # Убираем его тоже — он будет добавлен заново при показе
+    history.pop()
+    data['step_history'] = history
     
     # Удаляем данные текущего шага
     step_data_keys = {
@@ -876,6 +883,7 @@ def go_back(message):
     # Вызываем предыдущую функцию
     prev_func_map = {
         'ask_name': ask_name,
+        'ask_english': ask_english,
         'ask_age': ask_age,
         'ask_citizenship': ask_citizenship,
         'ask_gpa': ask_gpa,
@@ -956,6 +964,19 @@ def show_community_chat(message):
         reply_markup=markup)
 
 
+
+@bot.message_handler(commands=["stop"])
+def stop_handler(message):
+    bot.clear_step_handler_by_chat_id(message.chat.id)
+    user_data[message.chat.id] = {}
+    WAITING_FOR_UNI_SEARCH.discard(message.chat.id)
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    markup.add("🔍 Подобрать университеты")
+    markup.add("🔎 Быстрый поиск")
+    markup.add("📋 Чеклист документов")
+    markup.add("💬 Чат для поступающих")
+    bot.send_message(message.chat.id, "Анкета остановлена. Возвращаю в главное меню!", reply_markup=markup)
+
 @bot.message_handler(func=lambda m: m.text in ["🔍 Подобрать университеты", "🔍 Подобрать заново"])
 def ask_name(message):
     bot.clear_step_handler_by_chat_id(message.chat.id)
@@ -965,7 +986,18 @@ def ask_name(message):
     bot.register_next_step_handler(message, ask_age)
 
 def ask_age(message):
+    if message.text and message.text.startswith("/"):
+        bot.clear_step_handler_by_chat_id(message.chat.id)
+        start(message)
+        return
+    if message.text == "↩️ Назад":
+        bot.clear_step_handler_by_chat_id(message.chat.id)
+        start(message)
+        return
     user_data[message.chat.id]["name"] = message.text
+    if "step_history" not in user_data[message.chat.id]:
+        user_data[message.chat.id]["step_history"] = []
+    user_data[message.chat.id]["step_history"].append("ask_age")
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("До 18", "18–22")
     markup.add("23–27", "28+")
@@ -973,12 +1005,18 @@ def ask_age(message):
     bot.register_next_step_handler(message, ask_grade_or_status)
 
 def ask_grade_or_status(message):
+    if message.text and message.text.startswith("/"):
+        bot.clear_step_handler_by_chat_id(message.chat.id)
+        start(message)
+        return
     if message.text == "↩️ Назад":
         go_back(message)
         return
     if message.chat.id in user_data:
-        user_data[message.chat.id]["prev_step"] = user_data[message.chat.id].get("current_step", "")
         user_data[message.chat.id]["current_step"] = "ask_grade_or_status"
+        if "step_history" not in user_data[message.chat.id]:
+            user_data[message.chat.id]["step_history"] = []
+        user_data[message.chat.id]["step_history"].append("ask_grade_or_status")
     user_data[message.chat.id]["age"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     if message.text == "До 18":
@@ -995,12 +1033,18 @@ def ask_grade_or_status(message):
     bot.register_next_step_handler(message, ask_citizenship)
 
 def ask_citizenship(message):
+    if message.text and message.text.startswith("/"):
+        bot.clear_step_handler_by_chat_id(message.chat.id)
+        start(message)
+        return
     if message.text == "↩️ Назад":
         go_back(message)
         return
     if message.chat.id in user_data:
-        user_data[message.chat.id]["prev_step"] = user_data[message.chat.id].get("current_step", "")
         user_data[message.chat.id]["current_step"] = "ask_citizenship"
+        if "step_history" not in user_data[message.chat.id]:
+            user_data[message.chat.id]["step_history"] = []
+        user_data[message.chat.id]["step_history"].append("ask_citizenship")
     user_data[message.chat.id]["age_or_grade"] = message.text
     user_data[message.chat.id]["status"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -1013,12 +1057,18 @@ def ask_citizenship(message):
     bot.register_next_step_handler(message, ask_gpa)
 
 def ask_gpa(message):
+    if message.text and message.text.startswith("/"):
+        bot.clear_step_handler_by_chat_id(message.chat.id)
+        start(message)
+        return
     if message.text == "↩️ Назад":
         go_back(message)
         return
     if message.chat.id in user_data:
-        user_data[message.chat.id]["prev_step"] = user_data[message.chat.id].get("current_step", "")
         user_data[message.chat.id]["current_step"] = "ask_gpa"
+        if "step_history" not in user_data[message.chat.id]:
+            user_data[message.chat.id]["step_history"] = []
+        user_data[message.chat.id]["step_history"].append("ask_gpa")
     user_data[message.chat.id]["citizenship"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("⭐⭐⭐⭐⭐ Отлично (4.5–5)")
@@ -1029,12 +1079,18 @@ def ask_gpa(message):
     bot.register_next_step_handler(message, ask_achievements)
 
 def ask_achievements(message):
+    if message.text and message.text.startswith("/"):
+        bot.clear_step_handler_by_chat_id(message.chat.id)
+        start(message)
+        return
     if message.text == "↩️ Назад":
         go_back(message)
         return
     if message.chat.id in user_data:
-        user_data[message.chat.id]["prev_step"] = user_data[message.chat.id].get("current_step", "")
         user_data[message.chat.id]["current_step"] = "ask_achievements"
+        if "step_history" not in user_data[message.chat.id]:
+            user_data[message.chat.id]["step_history"] = []
+        user_data[message.chat.id]["step_history"].append("ask_achievements")
     user_data[message.chat.id]["gpa"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("🏆 Международные олимпиады")
@@ -1046,12 +1102,18 @@ def ask_achievements(message):
     bot.register_next_step_handler(message, ask_achievements_detail)
 
 def ask_achievements_detail(message):
+    if message.text and message.text.startswith("/"):
+        bot.clear_step_handler_by_chat_id(message.chat.id)
+        start(message)
+        return
     if message.text == "↩️ Назад":
         go_back(message)
         return
     if message.chat.id in user_data:
-        user_data[message.chat.id]["prev_step"] = user_data[message.chat.id].get("current_step", "")
         user_data[message.chat.id]["current_step"] = "ask_achievements_detail"
+        if "step_history" not in user_data[message.chat.id]:
+            user_data[message.chat.id]["step_history"] = []
+        user_data[message.chat.id]["step_history"].append("ask_achievements_detail")
     user_data[message.chat.id]["achievements"] = message.text
     if "➖" in message.text:
         user_data[message.chat.id]["achievements_detail"] = ""
@@ -1064,6 +1126,10 @@ def ask_achievements_detail(message):
     bot.register_next_step_handler(message, process_achievements_detail)
 
 def process_achievements_detail(message):
+    if message.text and message.text.startswith("/"):
+        bot.clear_step_handler_by_chat_id(message.chat.id)
+        start(message)
+        return
     if message.text == "↩️ Назад":
         go_back(message)
         return
@@ -1078,8 +1144,10 @@ def process_achievements_detail(message):
 
 def ask_english(message):
     if message.chat.id in user_data:
-        user_data[message.chat.id]["prev_step"] = user_data[message.chat.id].get("current_step", "")
         user_data[message.chat.id]["current_step"] = "ask_english"
+        if "step_history" not in user_data[message.chat.id]:
+            user_data[message.chat.id]["step_history"] = []
+        user_data[message.chat.id]["step_history"].append("ask_english")
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("🔴 A1–A2", "🟡 B1–B2")
     markup.add("🟢 C1", "⭐ C2")
@@ -1088,12 +1156,18 @@ def ask_english(message):
     bot.register_next_step_handler(message, ask_certificate)
 
 def ask_certificate(message):
+    if message.text and message.text.startswith("/"):
+        bot.clear_step_handler_by_chat_id(message.chat.id)
+        start(message)
+        return
     if message.text == "↩️ Назад":
         go_back(message)
         return
     if message.chat.id in user_data:
-        user_data[message.chat.id]["prev_step"] = user_data[message.chat.id].get("current_step", "")
         user_data[message.chat.id]["current_step"] = "ask_certificate"
+        if "step_history" not in user_data[message.chat.id]:
+            user_data[message.chat.id]["step_history"] = []
+        user_data[message.chat.id]["step_history"].append("ask_certificate")
     user_data[message.chat.id]["english"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("✅ IELTS", "✅ TOEFL")
@@ -1104,12 +1178,18 @@ def ask_certificate(message):
     bot.register_next_step_handler(message, ask_other_language)
 
 def ask_other_language(message):
+    if message.text and message.text.startswith("/"):
+        bot.clear_step_handler_by_chat_id(message.chat.id)
+        start(message)
+        return
     if message.text == "↩️ Назад":
         go_back(message)
         return
     if message.chat.id in user_data:
-        user_data[message.chat.id]["prev_step"] = user_data[message.chat.id].get("current_step", "")
         user_data[message.chat.id]["current_step"] = "ask_other_language"
+        if "step_history" not in user_data[message.chat.id]:
+            user_data[message.chat.id]["step_history"] = []
+        user_data[message.chat.id]["step_history"].append("ask_other_language")
     user_data[message.chat.id]["certificate"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("🇩🇪 Немецкий", "🇫🇷 Французский")
@@ -1123,12 +1203,18 @@ def ask_other_language(message):
     bot.register_next_step_handler(message, ask_other_language_level)
 
 def ask_other_language_level(message):
+    if message.text and message.text.startswith("/"):
+        bot.clear_step_handler_by_chat_id(message.chat.id)
+        start(message)
+        return
     if message.text == "↩️ Назад":
         go_back(message)
         return
     if message.chat.id in user_data:
-        user_data[message.chat.id]["prev_step"] = user_data[message.chat.id].get("current_step", "")
         user_data[message.chat.id]["current_step"] = "ask_other_language_level"
+        if "step_history" not in user_data[message.chat.id]:
+            user_data[message.chat.id]["step_history"] = []
+        user_data[message.chat.id]["step_history"].append("ask_other_language_level")
     user_data[message.chat.id]["other_language"] = message.text
     if "➖" in message.text:
         user_data[message.chat.id]["other_language_level"] = "Нет"
@@ -1148,12 +1234,18 @@ def ask_other_language_level(message):
     bot.register_next_step_handler(message, ask_passport)
 
 def ask_passport(message):
+    if message.text and message.text.startswith("/"):
+        bot.clear_step_handler_by_chat_id(message.chat.id)
+        start(message)
+        return
     if message.text == "↩️ Назад":
         go_back(message)
         return
     if message.chat.id in user_data:
-        user_data[message.chat.id]["prev_step"] = user_data[message.chat.id].get("current_step", "")
         user_data[message.chat.id]["current_step"] = "ask_passport"
+        if "step_history" not in user_data[message.chat.id]:
+            user_data[message.chat.id]["step_history"] = []
+        user_data[message.chat.id]["step_history"].append("ask_passport")
     user_data[message.chat.id]["other_language_level"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("✅ Есть, действующий")
@@ -1163,12 +1255,18 @@ def ask_passport(message):
     bot.register_next_step_handler(message, ask_visa)
 
 def ask_visa(message):
+    if message.text and message.text.startswith("/"):
+        bot.clear_step_handler_by_chat_id(message.chat.id)
+        start(message)
+        return
     if message.text == "↩️ Назад":
         go_back(message)
         return
     if message.chat.id in user_data:
-        user_data[message.chat.id]["prev_step"] = user_data[message.chat.id].get("current_step", "")
         user_data[message.chat.id]["current_step"] = "ask_visa"
+        if "step_history" not in user_data[message.chat.id]:
+            user_data[message.chat.id]["step_history"] = []
+        user_data[message.chat.id]["step_history"].append("ask_visa")
     user_data[message.chat.id]["passport"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("➖ Нет опыта", "✈️ Туристические")
@@ -1178,12 +1276,18 @@ def ask_visa(message):
     bot.register_next_step_handler(message, ask_hobbies)
 
 def ask_hobbies(message):
+    if message.text and message.text.startswith("/"):
+        bot.clear_step_handler_by_chat_id(message.chat.id)
+        start(message)
+        return
     if message.text == "↩️ Назад":
         go_back(message)
         return
     if message.chat.id in user_data:
-        user_data[message.chat.id]["prev_step"] = user_data[message.chat.id].get("current_step", "")
         user_data[message.chat.id]["current_step"] = "ask_hobbies"
+        if "step_history" not in user_data[message.chat.id]:
+            user_data[message.chat.id]["step_history"] = []
+        user_data[message.chat.id]["step_history"].append("ask_hobbies")
     user_data[message.chat.id]["visa"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("⚽ Спорт", "🎵 Музыка")
@@ -1195,12 +1299,18 @@ def ask_hobbies(message):
     bot.register_next_step_handler(message, ask_personality)
 
 def ask_personality(message):
+    if message.text and message.text.startswith("/"):
+        bot.clear_step_handler_by_chat_id(message.chat.id)
+        start(message)
+        return
     if message.text == "↩️ Назад":
         go_back(message)
         return
     if message.chat.id in user_data:
-        user_data[message.chat.id]["prev_step"] = user_data[message.chat.id].get("current_step", "")
         user_data[message.chat.id]["current_step"] = "ask_personality"
+        if "step_history" not in user_data[message.chat.id]:
+            user_data[message.chat.id]["step_history"] = []
+        user_data[message.chat.id]["step_history"].append("ask_personality")
     user_data[message.chat.id]["hobbies"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("🧩 Интроверт")
@@ -1211,12 +1321,18 @@ def ask_personality(message):
     bot.register_next_step_handler(message, ask_stress)
 
 def ask_stress(message):
+    if message.text and message.text.startswith("/"):
+        bot.clear_step_handler_by_chat_id(message.chat.id)
+        start(message)
+        return
     if message.text == "↩️ Назад":
         go_back(message)
         return
     if message.chat.id in user_data:
-        user_data[message.chat.id]["prev_step"] = user_data[message.chat.id].get("current_step", "")
         user_data[message.chat.id]["current_step"] = "ask_stress"
+        if "step_history" not in user_data[message.chat.id]:
+            user_data[message.chat.id]["step_history"] = []
+        user_data[message.chat.id]["step_history"].append("ask_stress")
     user_data[message.chat.id]["personality"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("💡 Ищу решение", "🤝 Прошу помощи")
@@ -1226,12 +1342,18 @@ def ask_stress(message):
     bot.register_next_step_handler(message, ask_leadership)
 
 def ask_leadership(message):
+    if message.text and message.text.startswith("/"):
+        bot.clear_step_handler_by_chat_id(message.chat.id)
+        start(message)
+        return
     if message.text == "↩️ Назад":
         go_back(message)
         return
     if message.chat.id in user_data:
-        user_data[message.chat.id]["prev_step"] = user_data[message.chat.id].get("current_step", "")
         user_data[message.chat.id]["current_step"] = "ask_leadership"
+        if "step_history" not in user_data[message.chat.id]:
+            user_data[message.chat.id]["step_history"] = []
+        user_data[message.chat.id]["step_history"].append("ask_leadership")
     user_data[message.chat.id]["stress"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("🦁 Беру инициативу")
@@ -1242,12 +1364,18 @@ def ask_leadership(message):
     bot.register_next_step_handler(message, ask_goal)
 
 def ask_goal(message):
+    if message.text and message.text.startswith("/"):
+        bot.clear_step_handler_by_chat_id(message.chat.id)
+        start(message)
+        return
     if message.text == "↩️ Назад":
         go_back(message)
         return
     if message.chat.id in user_data:
-        user_data[message.chat.id]["prev_step"] = user_data[message.chat.id].get("current_step", "")
         user_data[message.chat.id]["current_step"] = "ask_goal"
+        if "step_history" not in user_data[message.chat.id]:
+            user_data[message.chat.id]["step_history"] = []
+        user_data[message.chat.id]["step_history"].append("ask_goal")
     user_data[message.chat.id]["leadership"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("🌍 Остаться за рубежом")
@@ -1258,12 +1386,18 @@ def ask_goal(message):
     bot.register_next_step_handler(message, ask_career)
 
 def ask_career(message):
+    if message.text and message.text.startswith("/"):
+        bot.clear_step_handler_by_chat_id(message.chat.id)
+        start(message)
+        return
     if message.text == "↩️ Назад":
         go_back(message)
         return
     if message.chat.id in user_data:
-        user_data[message.chat.id]["prev_step"] = user_data[message.chat.id].get("current_step", "")
         user_data[message.chat.id]["current_step"] = "ask_career"
+        if "step_history" not in user_data[message.chat.id]:
+            user_data[message.chat.id]["step_history"] = []
+        user_data[message.chat.id]["step_history"].append("ask_career")
     user_data[message.chat.id]["goal"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("💻 IT / Стартап", "🏢 Корпорация")
@@ -1274,12 +1408,18 @@ def ask_career(message):
     bot.register_next_step_handler(message, ask_priority)
 
 def ask_priority(message):
+    if message.text and message.text.startswith("/"):
+        bot.clear_step_handler_by_chat_id(message.chat.id)
+        start(message)
+        return
     if message.text == "↩️ Назад":
         go_back(message)
         return
     if message.chat.id in user_data:
-        user_data[message.chat.id]["prev_step"] = user_data[message.chat.id].get("current_step", "")
         user_data[message.chat.id]["current_step"] = "ask_priority"
+        if "step_history" not in user_data[message.chat.id]:
+            user_data[message.chat.id]["step_history"] = []
+        user_data[message.chat.id]["step_history"].append("ask_priority")
     user_data[message.chat.id]["career"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("🏆 Рейтинг вуза", "💰 Стоимость")
@@ -1290,12 +1430,18 @@ def ask_priority(message):
     bot.register_next_step_handler(message, ask_main_field)
 
 def ask_main_field(message):
+    if message.text and message.text.startswith("/"):
+        bot.clear_step_handler_by_chat_id(message.chat.id)
+        start(message)
+        return
     if message.text == "↩️ Назад":
         go_back(message)
         return
     if message.chat.id in user_data:
-        user_data[message.chat.id]["prev_step"] = user_data[message.chat.id].get("current_step", "")
         user_data[message.chat.id]["current_step"] = "ask_main_field"
+        if "step_history" not in user_data[message.chat.id]:
+            user_data[message.chat.id]["step_history"] = []
+        user_data[message.chat.id]["step_history"].append("ask_main_field")
     user_data[message.chat.id]["priority"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     for f in FIELDS.keys():
@@ -1305,12 +1451,18 @@ def ask_main_field(message):
     bot.register_next_step_handler(message, ask_sub_field)
 
 def ask_sub_field(message):
+    if message.text and message.text.startswith("/"):
+        bot.clear_step_handler_by_chat_id(message.chat.id)
+        start(message)
+        return
     if message.text == "↩️ Назад":
         go_back(message)
         return
     if message.chat.id in user_data:
-        user_data[message.chat.id]["prev_step"] = user_data[message.chat.id].get("current_step", "")
         user_data[message.chat.id]["current_step"] = "ask_sub_field"
+        if "step_history" not in user_data[message.chat.id]:
+            user_data[message.chat.id]["step_history"] = []
+        user_data[message.chat.id]["step_history"].append("ask_sub_field")
     main_field = message.text
     if main_field not in FIELDS:
         bot.send_message(message.chat.id, "Пожалуйста выбери направление из списка")
@@ -1325,12 +1477,18 @@ def ask_sub_field(message):
     bot.register_next_step_handler(message, ask_sub_subfield)
 
 def ask_sub_subfield(message):
+    if message.text and message.text.startswith("/"):
+        bot.clear_step_handler_by_chat_id(message.chat.id)
+        start(message)
+        return
     if message.text == "↩️ Назад":
         go_back(message)
         return
     if message.chat.id in user_data:
-        user_data[message.chat.id]["prev_step"] = user_data[message.chat.id].get("current_step", "")
         user_data[message.chat.id]["current_step"] = "ask_sub_subfield"
+        if "step_history" not in user_data[message.chat.id]:
+            user_data[message.chat.id]["step_history"] = []
+        user_data[message.chat.id]["step_history"].append("ask_sub_subfield")
     sub_field = message.text
     user_data[message.chat.id]["field"] = sub_field
     cf = clean_field(sub_field)
@@ -1347,12 +1505,18 @@ def ask_sub_subfield(message):
         ask_budget(message)
 
 def ask_budget(message):
+    if message.text and message.text.startswith("/"):
+        bot.clear_step_handler_by_chat_id(message.chat.id)
+        start(message)
+        return
     if message.text == "↩️ Назад":
         go_back(message)
         return
     if message.chat.id in user_data:
-        user_data[message.chat.id]["prev_step"] = user_data[message.chat.id].get("current_step", "")
         user_data[message.chat.id]["current_step"] = "ask_budget"
+        if "step_history" not in user_data[message.chat.id]:
+            user_data[message.chat.id]["step_history"] = []
+        user_data[message.chat.id]["step_history"].append("ask_budget")
     if "subfield" not in user_data[message.chat.id]:
         user_data[message.chat.id]["subfield"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -1399,6 +1563,10 @@ def get_missing_requirements(data, budget):
     return missing
 
 def show_results(message):
+    if message.text and message.text.startswith("/"):
+        bot.clear_step_handler_by_chat_id(message.chat.id)
+        start(message)
+        return
     if message.text == "↩️ Назад":
         go_back(message)
         return
