@@ -1423,7 +1423,7 @@ def show_results(message):
         reasons = get_match_reasons(uni, data)
         reason_text = f"\n_{reasons[0]}_" if reasons else ""
         response += f"{uni['flag']} *{uni['name']}* — {uni['country']} {stars}\n💰 {uni['cost']} · 🎓 {uni['scholarship']} · РФ: {rf_status}{reason_text}\n\n"
-    response += "📌 Напиши название университета чтобы узнать подробнее!\n\n⚠️ _Данные актуальны на 2025 год._"
+    response += "📌 Напиши название университета чтобы узнать подробнее!\n\n💬 _Хочешь обсудить варианты с другими поступающими? [Присоединяйся к чату](https://t.me/Cvoi_Abroad)_\n\n⚠️ _Данные актуальны на 2025 год._"
 
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("🔍 Подобрать заново", "📋 Чеклист документов")
