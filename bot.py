@@ -909,6 +909,8 @@ def go_back(message):
     prev_func = prev_func_map.get(prev_step_name)
     if prev_func:
         prev_func(message)
+    elif message.text in ["🔙 Назад", "🔙 В главное меню"]:
+        start(message)
     else:
         start(message)
 
@@ -959,7 +961,7 @@ def show_community_chat(message):
         "— задать вопросы тем кто уже учится\n"
         "— поделиться своим опытом\n"
         "— получить поддержку\n\n"
-        "👉 https://t.me/Cvoi_Abroad",
+        "👉 [Присоединиться к чату](https://t.me/Cvoi_Abroad)",
         parse_mode="Markdown",
         reply_markup=markup)
 
@@ -1691,7 +1693,6 @@ def quick_search_filter(message):
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         for f in FIELDS.keys():
             markup.add(f)
-        markup.add("↩️ Назад")
         bot.send_message(message.chat.id, "Выбери направление:", reply_markup=markup)
         bot.register_next_step_handler(message, quick_search_by_main_field)
     elif message.text == "🌍 По стране":
@@ -1703,7 +1704,6 @@ def quick_search_filter(message):
         markup.add("🇰🇷 Южная Корея", "🇺🇸 США")
         markup.add("🇬🇧 Великобритания", "🇦🇲 Армения")
         markup.add("🇦🇹 Австрия", "🇰🇿 Казахстан")
-        markup.add("↩️ Назад")
         bot.send_message(message.chat.id, "Выбери страну:", reply_markup=markup)
         bot.register_next_step_handler(message, quick_search_by_country)
     elif message.text == "💰 Бесплатные":
@@ -1714,6 +1714,9 @@ def quick_search_filter(message):
         start(message)
 
 def quick_search_by_main_field(message):
+    if message.text == "↩️ Назад":
+        quick_search(message)
+        return
     main_field = message.text
     if main_field not in FIELDS:
         start(message)
@@ -1727,6 +1730,9 @@ def quick_search_by_main_field(message):
     bot.register_next_step_handler(message, quick_search_by_sub_field)
 
 def quick_search_by_sub_field(message):
+    if message.text == "↩️ Назад":
+        quick_search(message)
+        return
     main_field = user_data.get(message.chat.id, {}).get("quick_main_field", "")
     if "➖" in message.text:
         quick_show_filtered(message.chat.id, main_field=main_field)
@@ -1734,12 +1740,21 @@ def quick_search_by_sub_field(message):
         quick_show_filtered(message.chat.id, field_filter=message.text)
 
 def quick_search_by_country(message):
+    if message.text == "↩️ Назад":
+        quick_search(message)
+        return
     text = message.text
     parts = text.split(" ", 1)
     country = parts[1].strip() if len(parts) > 1 else text.strip()
     quick_show_filtered(message.chat.id, country_filter=country)
 
 def quick_show_filtered(chat_id, field_filter=None, main_field=None, country_filter=None, cost_filter=None, scholarship_filter=False):
+    try:
+        _quick_show_filtered_impl(chat_id, field_filter, main_field, country_filter, cost_filter, scholarship_filter)
+    except Exception as e:
+        bot.send_message(chat_id, f"Ошибка поиска: {e}")
+
+def _quick_show_filtered_impl(chat_id, field_filter=None, main_field=None, country_filter=None, cost_filter=None, scholarship_filter=False):
     cf = clean_field(field_filter) if field_filter else None
     cf_norm = normalize(cf) if cf else None
 
