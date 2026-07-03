@@ -801,6 +801,161 @@ def start(message):
         "Что хочешь сделать?",
         reply_markup=markup)
 
+
+# Маппинг шагов для кнопки назад
+STEP_BACK_MAP = {
+    'ask_grade_or_status': 'ask_name',
+    'ask_citizenship': 'ask_name',
+    'ask_gpa': 'ask_citizenship',
+    'ask_achievements': 'ask_gpa',
+    'ask_achievements_detail': 'ask_achievements',
+    'ask_english': 'ask_achievements',
+    'ask_certificate': 'ask_english',
+    'ask_other_language': 'ask_certificate',
+    'ask_other_language_level': 'ask_other_language',
+    'ask_passport': 'ask_other_language',
+    'ask_visa': 'ask_passport',
+    'ask_hobbies': 'ask_visa',
+    'ask_personality': 'ask_hobbies',
+    'ask_stress': 'ask_personality',
+    'ask_leadership': 'ask_stress',
+    'ask_goal': 'ask_leadership',
+    'ask_career': 'ask_goal',
+    'ask_priority': 'ask_career',
+    'ask_main_field': 'ask_priority',
+    'ask_sub_field': 'ask_main_field',
+    'ask_sub_subfield': 'ask_sub_field',
+    'ask_budget': 'ask_sub_subfield',
+}
+
+@bot.message_handler(func=lambda m: m.text == "↩️ Назад")
+def go_back(message):
+    data = user_data.get(message.chat.id, {})
+    current_step = data.get('current_step', '')
+    
+    if not current_step or current_step not in STEP_BACK_MAP:
+        # Возвращаем в главное меню
+        start(message)
+        return
+    
+    prev_step_name = STEP_BACK_MAP[current_step]
+    
+    # Удаляем данные текущего шага
+    step_data_keys = {
+        'ask_grade_or_status': 'age',
+        'ask_citizenship': 'age_or_grade',
+        'ask_gpa': 'citizenship',
+        'ask_achievements': 'gpa',
+        'ask_achievements_detail': 'achievements',
+        'ask_english': 'achievements_detail',
+        'ask_certificate': 'english',
+        'ask_other_language': 'certificate',
+        'ask_other_language_level': 'other_language',
+        'ask_passport': 'other_language_level',
+        'ask_visa': 'passport',
+        'ask_hobbies': 'visa',
+        'ask_personality': 'hobbies',
+        'ask_stress': 'personality',
+        'ask_leadership': 'stress',
+        'ask_goal': 'leadership',
+        'ask_career': 'goal',
+        'ask_priority': 'career',
+        'ask_main_field': 'priority',
+        'ask_sub_field': 'main_field',
+        'ask_sub_subfield': 'field',
+        'ask_budget': 'subfield',
+    }
+    
+    # Удаляем данные текущего и предыдущего шага чтобы вернуться чисто
+    key_to_remove = step_data_keys.get(current_step)
+    if key_to_remove and key_to_remove in data:
+        del data[key_to_remove]
+    
+    bot.clear_step_handler_by_chat_id(message.chat.id)
+    
+    # Вызываем предыдущую функцию
+    prev_func_map = {
+        'ask_name': ask_name,
+        'ask_age': ask_age,
+        'ask_citizenship': ask_citizenship,
+        'ask_gpa': ask_gpa,
+        'ask_achievements': ask_achievements,
+        'ask_english': ask_english,
+        'ask_certificate': ask_certificate,
+        'ask_other_language': ask_other_language,
+        'ask_other_language_level': ask_other_language_level,
+        'ask_passport': ask_passport,
+        'ask_visa': ask_visa,
+        'ask_hobbies': ask_hobbies,
+        'ask_personality': ask_personality,
+        'ask_stress': ask_stress,
+        'ask_leadership': ask_leadership,
+        'ask_goal': ask_goal,
+        'ask_career': ask_career,
+        'ask_priority': ask_priority,
+        'ask_main_field': ask_main_field,
+        'ask_sub_field': ask_sub_field,
+        'ask_sub_subfield': ask_sub_subfield,
+    }
+    
+    prev_func = prev_func_map.get(prev_step_name)
+    if prev_func:
+        prev_func(message)
+    else:
+        start(message)
+
+
+@bot.message_handler(commands=["stats"])
+def show_stats(message):
+    total = len(STATS["total_users"])
+    today = len(STATS["started_today"])
+    completed = STATS["completed"]
+
+    top_citizenships = sorted(STATS["citizenships"].items(), key=lambda x: x[1], reverse=True)[:5]
+    top_fields = sorted(STATS["fields"].items(), key=lambda x: x[1], reverse=True)[:5]
+
+    response = (
+        f"📊 *Статистика Viamo*\n\n"
+        f"👥 Всего пользователей: *{total}*\n"
+        f"📅 Сегодня: *{today}*\n"
+        f"✅ Завершили анкету: *{completed}*\n\n"
+    )
+
+    if top_citizenships:
+        response += "*🌍 Топ гражданств:*\n"
+        for c, n in top_citizenships:
+            response += f"  {c}: {n}\n"
+        response += "\n"
+
+    if top_fields:
+        response += "*📚 Топ направлений:*\n"
+        for f, n in top_fields:
+            response += f"  {f}: {n}\n"
+
+    response += "\n⚠️ _Статистика сбрасывается при перезапуске бота. Постоянные данные — в Google Sheets._"
+    bot.send_message(message.chat.id, response, parse_mode="Markdown")
+
+
+@bot.message_handler(func=lambda m: m.text == "💬 Чат для поступающих")
+def show_community_chat(message):
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    markup.add("🔍 Подобрать университеты")
+    markup.add("🔎 Быстрый поиск")
+    markup.add("📋 Чеклист документов")
+    markup.add("💬 Чат для поступающих")
+    bot.send_message(message.chat.id,
+        "💬 *Сообщество поступающих за рубеж*\n\n"
+        "Присоединяйся к чату где собрались такие же как ты — те кто планирует или уже поступает в университеты за рубежом!\n\n"
+        "Там можно:\n"
+        "— найти единомышленников\n"
+        "— задать вопросы тем кто уже учится\n"
+        "— поделиться своим опытом\n"
+        "— получить поддержку\n\n"
+        "👉 https://t.me/Cvoi_Abroad",
+        parse_mode="Markdown",
+        reply_markup=markup)
+
+
 @bot.message_handler(func=lambda m: m.text in ["🔍 Подобрать университеты", "🔍 Подобрать заново"])
 def ask_name(message):
     bot.clear_step_handler_by_chat_id(message.chat.id)
@@ -818,6 +973,9 @@ def ask_age(message):
     bot.register_next_step_handler(message, ask_grade_or_status)
 
 def ask_grade_or_status(message):
+    if message.text == "↩️ Назад":
+        go_back(message)
+        return
     if message.chat.id in user_data: user_data[message.chat.id]["current_step"] = "ask_grade_or_status"
     user_data[message.chat.id]["age"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -835,6 +993,9 @@ def ask_grade_or_status(message):
     bot.register_next_step_handler(message, ask_citizenship)
 
 def ask_citizenship(message):
+    if message.text == "↩️ Назад":
+        go_back(message)
+        return
     if message.chat.id in user_data: user_data[message.chat.id]["current_step"] = "ask_citizenship"
     user_data[message.chat.id]["age_or_grade"] = message.text
     user_data[message.chat.id]["status"] = message.text
@@ -848,6 +1009,9 @@ def ask_citizenship(message):
     bot.register_next_step_handler(message, ask_gpa)
 
 def ask_gpa(message):
+    if message.text == "↩️ Назад":
+        go_back(message)
+        return
     if message.chat.id in user_data: user_data[message.chat.id]["current_step"] = "ask_gpa"
     user_data[message.chat.id]["citizenship"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -859,6 +1023,9 @@ def ask_gpa(message):
     bot.register_next_step_handler(message, ask_achievements)
 
 def ask_achievements(message):
+    if message.text == "↩️ Назад":
+        go_back(message)
+        return
     if message.chat.id in user_data: user_data[message.chat.id]["current_step"] = "ask_achievements"
     user_data[message.chat.id]["gpa"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -871,6 +1038,9 @@ def ask_achievements(message):
     bot.register_next_step_handler(message, ask_achievements_detail)
 
 def ask_achievements_detail(message):
+    if message.text == "↩️ Назад":
+        go_back(message)
+        return
     if message.chat.id in user_data: user_data[message.chat.id]["current_step"] = "ask_achievements_detail"
     user_data[message.chat.id]["achievements"] = message.text
     if "➖" in message.text:
@@ -884,6 +1054,9 @@ def ask_achievements_detail(message):
     bot.register_next_step_handler(message, process_achievements_detail)
 
 def process_achievements_detail(message):
+    if message.text == "↩️ Назад":
+        go_back(message)
+        return
     user_data[message.chat.id]["achievements_detail"] = message.text
     analysis = analyze_achievements(message.text)
     response = "🎯 *Анализ твоих достижений:*\n\n"
@@ -903,6 +1076,9 @@ def ask_english(message):
     bot.register_next_step_handler(message, ask_certificate)
 
 def ask_certificate(message):
+    if message.text == "↩️ Назад":
+        go_back(message)
+        return
     if message.chat.id in user_data: user_data[message.chat.id]["current_step"] = "ask_certificate"
     user_data[message.chat.id]["english"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -914,6 +1090,9 @@ def ask_certificate(message):
     bot.register_next_step_handler(message, ask_other_language)
 
 def ask_other_language(message):
+    if message.text == "↩️ Назад":
+        go_back(message)
+        return
     if message.chat.id in user_data: user_data[message.chat.id]["current_step"] = "ask_other_language"
     user_data[message.chat.id]["certificate"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -928,6 +1107,9 @@ def ask_other_language(message):
     bot.register_next_step_handler(message, ask_other_language_level)
 
 def ask_other_language_level(message):
+    if message.text == "↩️ Назад":
+        go_back(message)
+        return
     if message.chat.id in user_data: user_data[message.chat.id]["current_step"] = "ask_other_language_level"
     user_data[message.chat.id]["other_language"] = message.text
     if "➖" in message.text:
@@ -948,6 +1130,9 @@ def ask_other_language_level(message):
     bot.register_next_step_handler(message, ask_passport)
 
 def ask_passport(message):
+    if message.text == "↩️ Назад":
+        go_back(message)
+        return
     if message.chat.id in user_data: user_data[message.chat.id]["current_step"] = "ask_passport"
     user_data[message.chat.id]["other_language_level"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -958,6 +1143,9 @@ def ask_passport(message):
     bot.register_next_step_handler(message, ask_visa)
 
 def ask_visa(message):
+    if message.text == "↩️ Назад":
+        go_back(message)
+        return
     if message.chat.id in user_data: user_data[message.chat.id]["current_step"] = "ask_visa"
     user_data[message.chat.id]["passport"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -968,6 +1156,9 @@ def ask_visa(message):
     bot.register_next_step_handler(message, ask_hobbies)
 
 def ask_hobbies(message):
+    if message.text == "↩️ Назад":
+        go_back(message)
+        return
     if message.chat.id in user_data: user_data[message.chat.id]["current_step"] = "ask_hobbies"
     user_data[message.chat.id]["visa"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -980,6 +1171,9 @@ def ask_hobbies(message):
     bot.register_next_step_handler(message, ask_personality)
 
 def ask_personality(message):
+    if message.text == "↩️ Назад":
+        go_back(message)
+        return
     if message.chat.id in user_data: user_data[message.chat.id]["current_step"] = "ask_personality"
     user_data[message.chat.id]["hobbies"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -991,6 +1185,9 @@ def ask_personality(message):
     bot.register_next_step_handler(message, ask_stress)
 
 def ask_stress(message):
+    if message.text == "↩️ Назад":
+        go_back(message)
+        return
     if message.chat.id in user_data: user_data[message.chat.id]["current_step"] = "ask_stress"
     user_data[message.chat.id]["personality"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -1001,6 +1198,9 @@ def ask_stress(message):
     bot.register_next_step_handler(message, ask_leadership)
 
 def ask_leadership(message):
+    if message.text == "↩️ Назад":
+        go_back(message)
+        return
     if message.chat.id in user_data: user_data[message.chat.id]["current_step"] = "ask_leadership"
     user_data[message.chat.id]["stress"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -1012,6 +1212,9 @@ def ask_leadership(message):
     bot.register_next_step_handler(message, ask_goal)
 
 def ask_goal(message):
+    if message.text == "↩️ Назад":
+        go_back(message)
+        return
     if message.chat.id in user_data: user_data[message.chat.id]["current_step"] = "ask_goal"
     user_data[message.chat.id]["leadership"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -1023,6 +1226,9 @@ def ask_goal(message):
     bot.register_next_step_handler(message, ask_career)
 
 def ask_career(message):
+    if message.text == "↩️ Назад":
+        go_back(message)
+        return
     if message.chat.id in user_data: user_data[message.chat.id]["current_step"] = "ask_career"
     user_data[message.chat.id]["goal"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -1034,6 +1240,9 @@ def ask_career(message):
     bot.register_next_step_handler(message, ask_priority)
 
 def ask_priority(message):
+    if message.text == "↩️ Назад":
+        go_back(message)
+        return
     if message.chat.id in user_data: user_data[message.chat.id]["current_step"] = "ask_priority"
     user_data[message.chat.id]["career"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -1045,6 +1254,9 @@ def ask_priority(message):
     bot.register_next_step_handler(message, ask_main_field)
 
 def ask_main_field(message):
+    if message.text == "↩️ Назад":
+        go_back(message)
+        return
     if message.chat.id in user_data: user_data[message.chat.id]["current_step"] = "ask_main_field"
     user_data[message.chat.id]["priority"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -1055,6 +1267,9 @@ def ask_main_field(message):
     bot.register_next_step_handler(message, ask_sub_field)
 
 def ask_sub_field(message):
+    if message.text == "↩️ Назад":
+        go_back(message)
+        return
     if message.chat.id in user_data: user_data[message.chat.id]["current_step"] = "ask_sub_field"
     main_field = message.text
     if main_field not in FIELDS:
@@ -1070,6 +1285,9 @@ def ask_sub_field(message):
     bot.register_next_step_handler(message, ask_sub_subfield)
 
 def ask_sub_subfield(message):
+    if message.text == "↩️ Назад":
+        go_back(message)
+        return
     if message.chat.id in user_data: user_data[message.chat.id]["current_step"] = "ask_sub_subfield"
     sub_field = message.text
     user_data[message.chat.id]["field"] = sub_field
@@ -1087,6 +1305,9 @@ def ask_sub_subfield(message):
         ask_budget(message)
 
 def ask_budget(message):
+    if message.text == "↩️ Назад":
+        go_back(message)
+        return
     if message.chat.id in user_data: user_data[message.chat.id]["current_step"] = "ask_budget"
     if "subfield" not in user_data[message.chat.id]:
         user_data[message.chat.id]["subfield"] = message.text
@@ -1134,6 +1355,9 @@ def get_missing_requirements(data, budget):
     return missing
 
 def show_results(message):
+    if message.text == "↩️ Назад":
+        go_back(message)
+        return
     data = user_data.get(message.chat.id, {})
     citizenship = data.get("citizenship", "")
     field = data.get("field", "")
@@ -1408,159 +1632,6 @@ def show_admission_plan(message):
     markup.add("↩️ Назад")
     bot.send_message(message.chat.id, plan, parse_mode="Markdown", reply_markup=markup)
 
-
-# Маппинг шагов для кнопки назад
-STEP_BACK_MAP = {
-    'ask_grade_or_status': 'ask_name',
-    'ask_citizenship': 'ask_name',
-    'ask_gpa': 'ask_citizenship',
-    'ask_achievements': 'ask_gpa',
-    'ask_achievements_detail': 'ask_achievements',
-    'ask_english': 'ask_achievements',
-    'ask_certificate': 'ask_english',
-    'ask_other_language': 'ask_certificate',
-    'ask_other_language_level': 'ask_other_language',
-    'ask_passport': 'ask_other_language',
-    'ask_visa': 'ask_passport',
-    'ask_hobbies': 'ask_visa',
-    'ask_personality': 'ask_hobbies',
-    'ask_stress': 'ask_personality',
-    'ask_leadership': 'ask_stress',
-    'ask_goal': 'ask_leadership',
-    'ask_career': 'ask_goal',
-    'ask_priority': 'ask_career',
-    'ask_main_field': 'ask_priority',
-    'ask_sub_field': 'ask_main_field',
-    'ask_sub_subfield': 'ask_sub_field',
-    'ask_budget': 'ask_sub_subfield',
-}
-
-@bot.message_handler(func=lambda m: m.text == "↩️ Назад")
-def go_back(message):
-    data = user_data.get(message.chat.id, {})
-    current_step = data.get('current_step', '')
-    
-    if not current_step or current_step not in STEP_BACK_MAP:
-        # Возвращаем в главное меню
-        start(message)
-        return
-    
-    prev_step_name = STEP_BACK_MAP[current_step]
-    
-    # Удаляем данные текущего шага
-    step_data_keys = {
-        'ask_grade_or_status': 'age',
-        'ask_citizenship': 'age_or_grade',
-        'ask_gpa': 'citizenship',
-        'ask_achievements': 'gpa',
-        'ask_achievements_detail': 'achievements',
-        'ask_english': 'achievements_detail',
-        'ask_certificate': 'english',
-        'ask_other_language': 'certificate',
-        'ask_other_language_level': 'other_language',
-        'ask_passport': 'other_language_level',
-        'ask_visa': 'passport',
-        'ask_hobbies': 'visa',
-        'ask_personality': 'hobbies',
-        'ask_stress': 'personality',
-        'ask_leadership': 'stress',
-        'ask_goal': 'leadership',
-        'ask_career': 'goal',
-        'ask_priority': 'career',
-        'ask_main_field': 'priority',
-        'ask_sub_field': 'main_field',
-        'ask_sub_subfield': 'field',
-        'ask_budget': 'subfield',
-    }
-    
-    # Удаляем данные текущего и предыдущего шага чтобы вернуться чисто
-    key_to_remove = step_data_keys.get(current_step)
-    if key_to_remove and key_to_remove in data:
-        del data[key_to_remove]
-    
-    bot.clear_step_handler_by_chat_id(message.chat.id)
-    
-    # Вызываем предыдущую функцию
-    prev_func_map = {
-        'ask_name': ask_name,
-        'ask_age': ask_age,
-        'ask_citizenship': ask_citizenship,
-        'ask_gpa': ask_gpa,
-        'ask_achievements': ask_achievements,
-        'ask_english': ask_english,
-        'ask_certificate': ask_certificate,
-        'ask_other_language': ask_other_language,
-        'ask_other_language_level': ask_other_language_level,
-        'ask_passport': ask_passport,
-        'ask_visa': ask_visa,
-        'ask_hobbies': ask_hobbies,
-        'ask_personality': ask_personality,
-        'ask_stress': ask_stress,
-        'ask_leadership': ask_leadership,
-        'ask_goal': ask_goal,
-        'ask_career': ask_career,
-        'ask_priority': ask_priority,
-        'ask_main_field': ask_main_field,
-        'ask_sub_field': ask_sub_field,
-        'ask_sub_subfield': ask_sub_subfield,
-    }
-    
-    prev_func = prev_func_map.get(prev_step_name)
-    if prev_func:
-        prev_func(message)
-    else:
-        start(message)
-
-
-@bot.message_handler(commands=["stats"])
-def show_stats(message):
-    total = len(STATS["total_users"])
-    today = len(STATS["started_today"])
-    completed = STATS["completed"]
-
-    top_citizenships = sorted(STATS["citizenships"].items(), key=lambda x: x[1], reverse=True)[:5]
-    top_fields = sorted(STATS["fields"].items(), key=lambda x: x[1], reverse=True)[:5]
-
-    response = (
-        f"📊 *Статистика Viamo*\n\n"
-        f"👥 Всего пользователей: *{total}*\n"
-        f"📅 Сегодня: *{today}*\n"
-        f"✅ Завершили анкету: *{completed}*\n\n"
-    )
-
-    if top_citizenships:
-        response += "*🌍 Топ гражданств:*\n"
-        for c, n in top_citizenships:
-            response += f"  {c}: {n}\n"
-        response += "\n"
-
-    if top_fields:
-        response += "*📚 Топ направлений:*\n"
-        for f, n in top_fields:
-            response += f"  {f}: {n}\n"
-
-    response += "\n⚠️ _Статистика сбрасывается при перезапуске бота. Постоянные данные — в Google Sheets._"
-    bot.send_message(message.chat.id, response, parse_mode="Markdown")
-
-
-@bot.message_handler(func=lambda m: m.text == "💬 Чат для поступающих")
-def show_community_chat(message):
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    markup.add("🔍 Подобрать университеты")
-    markup.add("🔎 Быстрый поиск")
-    markup.add("📋 Чеклист документов")
-    markup.add("💬 Чат для поступающих")
-    bot.send_message(message.chat.id,
-        "💬 *Сообщество поступающих за рубеж*\n\n"
-        "Присоединяйся к чату где собрались такие же как ты — те кто планирует или уже поступает в университеты за рубежом!\n\n"
-        "Там можно:\n"
-        "— найти единомышленников\n"
-        "— задать вопросы тем кто уже учится\n"
-        "— поделиться своим опытом\n"
-        "— получить поддержку\n\n"
-        "👉 https://t.me/Cvoi_Abroad",
-        parse_mode="Markdown",
-        reply_markup=markup)
 
 SKIP_TEXTS = [
     "🔍 Подобрать университеты", "🔍 Подобрать заново", "📋 Чеклист документов",
