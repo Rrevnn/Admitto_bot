@@ -775,12 +775,15 @@ def normalize(text):
     return " ".join(text.split()).strip().lower()
 
 def clean_field(text):
+    """Убирает эмодзи из начала строки"""
     if not text:
         return text
-    parts = text.strip().split(" ", 1)
-    if len(parts) > 1 and len(parts[0]) <= 3:
+    text = text.strip()
+    # Убираем только если первый символ реально эмодзи (ord > 127)
+    parts = text.split(" ", 1)
+    if len(parts) > 1 and len(parts[0]) >= 1 and ord(parts[0][0]) > 127:
         return parts[1].strip()
-    return text.strip()
+    return text
 
 @bot.message_handler(commands=["start"])
 def start(message):
