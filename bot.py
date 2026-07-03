@@ -1596,14 +1596,18 @@ def show_results(message):
         completed=True)
 
     results = []
-    for uni in UNIVERSITIES:
-        if not uni["name"]: continue
-        if is_rf and not uni["rf_ok"]: continue
-        if normalize(uni["field"]) != normalize(cf): continue
-        if "Бесплатно" in budget and uni["cost"] != "Бесплатно": continue
-        uni_copy = dict(uni)
-        uni_copy["score"] = score_university(uni, data)
-        results.append(uni_copy)
+    try:
+        for uni in UNIVERSITIES:
+            if not uni["name"]: continue
+            if is_rf and not uni["rf_ok"]: continue
+            if normalize(uni["field"]) != normalize(cf): continue
+            if "Бесплатно" in budget and uni["cost"] != "Бесплатно": continue
+            uni_copy = dict(uni)
+            uni_copy["score"] = score_university(uni, data)
+            results.append(uni_copy)
+    except Exception as e:
+        bot.send_message(message.chat.id, f"DEBUG ошибка фильтрации: {e}")
+        return
 
     results.sort(key=lambda x: x["score"], reverse=True)
     name = data.get("name", "")
