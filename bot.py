@@ -462,6 +462,8 @@ def get_match_reasons(uni, data):
         reasons.append("🗣️ Знаешь китайский — доступны все программы")
     if "Корейский" in other_language and country == "Южная Корея":
         reasons.append("🗣️ Знаешь корейский — доступны все программы")
+    if "Испанский" in other_language and country == "Испания":
+        reasons.append("🗣️ Знаешь испанский — доступны все программы")
     if "Технологии" in hobbies and country in ["Германия", "Нидерланды", "Южная Корея"]:
         reasons.append("💻 Страна с сильной tech-индустрией")
     if "Искусство" in hobbies and country in ["Австрия", "Чехия", "Грузия"]:
@@ -506,6 +508,8 @@ def score_university(uni, data):
     if "Сербский" in other_language and country == "Сербия": score += 3
     if "Чешский" in other_language and country == "Чехия": score += 3
     if "Венгерский" in other_language and country == "Венгрия": score += 3
+    if "Испанский" in other_language and country == "Испания": score += 3
+    if "Итальянский" in other_language and country == "Италия": score += 3
     if "Технологии" in hobbies and country in ["Германия", "Нидерланды", "Южная Корея"]: score += 2
     if "Искусство" in hobbies and country in ["Австрия", "Чехия", "Грузия"]: score += 2
     if "Бизнес" in hobbies and country in ["ОАЭ", "Турция", "США"]: score += 2
@@ -593,7 +597,7 @@ SKIP_TEXTS = [
     "🔍 Подобрать университеты", "🔍 Подобрать заново", "📋 Чеклист документов",
     "🔎 Быстрый поиск", "🔄 Сменить специальность", "🔄 Сменить направление",
     "💰 Расширить бюджет", "🔍 Начать заново", "🔙 В главное меню",
-    "⚖️ Сравнить с другим", "🗑 Очистить сравнение", "💬 Чат для поступающих",
+    "⚖️ Сравнить с другим", "🗑 Очистить сравнение", "💬 Чат для поступающих", "🔄 Сменить специальность", "🔄 Сменить направление", "💰 Расширить бюджет", "✅ Готово", "✅ Готово (выбрал все)",
 ]
 
 def main_menu_markup():
@@ -727,34 +731,93 @@ def ask_certificate(message):
     user_data[message.chat.id]["english"] = message.text
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("✅ IELTS", "✅ TOEFL"); markup.add("✅ Goethe / TestDaF", "✅ DELF / DALF")
+    markup.add("✅ DELE (испанский)", "✅ CILS / CELI (итальянский)")
     markup.add("📅 Планирую сдать", "➖ Нет")
     bot.send_message(message.chat.id, "Языковые сертификаты?", reply_markup=markup)
     bot.register_next_step_handler(message, ask_other_language)
 
+LANG_OPTIONS = ["🇩🇪 Немецкий", "🇫🇷 Французский", "🇹🇷 Турецкий", "🇨🇳 Китайский",
+                "🇰🇷 Корейский", "🇷🇸 Сербский", "🇨🇿 Чешский", "🇭🇺 Венгерский",
+                "🇪🇸 Испанский", "🇮🇹 Итальянский"]
+
 def ask_other_language(message):
     if message.text and message.text.startswith("/"): bot.clear_step_handler_by_chat_id(message.chat.id); start(message); return
     user_data[message.chat.id]["certificate"] = message.text
+    user_data[message.chat.id]["languages_list"] = []
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("🇩🇪 Немецкий", "🇫🇷 Французский"); markup.add("🇹🇷 Турецкий", "🇨🇳 Китайский")
     markup.add("🇰🇷 Корейский", "🇷🇸 Сербский"); markup.add("🇨🇿 Чешский", "🇭🇺 Венгерский")
-    markup.add("➖ Только английский / русский")
-    bot.send_message(message.chat.id, "Знаешь ли ты другие языки?\n\n💡 Во многих странах можно учиться бесплатно на местном языке!", reply_markup=markup)
-    bot.register_next_step_handler(message, ask_other_language_level)
+    markup.add("🇪🇸 Испанский", "🇮🇹 Итальянский")
+    markup.add("✅ Готово"); markup.add("➖ Только английский / русский")
+    bot.send_message(message.chat.id,
+        "Знаешь ли ты другие языки?\n\n💡 Во многих странах можно учиться бесплатно на местном языке!\n_Выбери один или несколько, потом нажми Готово_",
+        reply_markup=markup, parse_mode="Markdown")
+    bot.register_next_step_handler(message, collect_languages)
+
+def collect_languages(message):
+    if message.text and message.text.startswith("/"): bot.clear_step_handler_by_chat_id(message.chat.id); start(message); return
+    def go_to_passport():
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        markup.add("✅ Есть, действующий"); markup.add("⚠️ Скоро истечёт"); markup.add("❌ Нет")
+        bot.send_message(message.chat.id, "Загранпаспорт?", reply_markup=markup)
+        bot.register_next_step_handler(message, ask_visa)
+    if "➖" in message.text:
+        user_data[message.chat.id]["other_language"] = "Нет"
+        user_data[message.chat.id]["other_language_level"] = "Нет"
+        go_to_passport()
+        return
+    if message.text == "✅ Готово":
+        langs_list = user_data[message.chat.id].get("languages_list", [])
+        if langs_list:
+            user_data[message.chat.id]["other_language"] = ", ".join(langs_list)
+            selected = ", ".join([l.split(" ", 1)[1] if " " in l else l for l in langs_list])
+            bot.send_message(message.chat.id, f"✅ Отлично! Языки: {selected}")
+        else:
+            user_data[message.chat.id]["other_language"] = "Нет"
+        user_data[message.chat.id]["other_language_level"] = "Есть"
+        go_to_passport()
+        return
+    if message.text in LANG_OPTIONS:
+        langs_list = user_data[message.chat.id].get("languages_list", [])
+        if message.text not in langs_list:
+            langs_list.append(message.text)
+            user_data[message.chat.id]["languages_list"] = langs_list
+        selected = ", ".join([l.split(" ", 1)[1] if " " in l else l for l in langs_list])
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        markup.add("🇩🇪 Немецкий", "🇫🇷 Французский"); markup.add("🇹🇷 Турецкий", "🇨🇳 Китайский")
+        markup.add("🇰🇷 Корейский", "🇷🇸 Сербский"); markup.add("🇨🇿 Чешский", "🇭🇺 Венгерский")
+        markup.add("🇪🇸 Испанский", "🇮🇹 Итальянский")
+        markup.add("✅ Готово"); markup.add("➖ Только английский / русский")
+        bot.send_message(message.chat.id, f"✅ Выбрано: *{selected}*\n\nДобавь ещё или нажми Готово", reply_markup=markup, parse_mode="Markdown")
+    bot.register_next_step_handler(message, collect_languages)
+
 
 def ask_other_language_level(message):
     if message.text and message.text.startswith("/"): bot.clear_step_handler_by_chat_id(message.chat.id); start(message); return
-    user_data[message.chat.id]["other_language"] = message.text
+    lang_options = ["🇩🇪 Немецкий", "🇫🇷 Французский", "🇹🇷 Турецкий", "🇨🇳 Китайский",
+                    "🇰🇷 Корейский", "🇷🇸 Сербский", "🇨🇿 Чешский", "🇭🇺 Венгерский",
+                    "🇪🇸 Испанский", "🇮🇹 Итальянский"]
     if "➖" in message.text:
+        user_data[message.chat.id]["other_language"] = "Нет"
         user_data[message.chat.id]["other_language_level"] = "Нет"
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         markup.add("✅ Есть, действующий"); markup.add("⚠️ Скоро истечёт"); markup.add("❌ Нет")
         bot.send_message(message.chat.id, "Загранпаспорт?", reply_markup=markup)
         bot.register_next_step_handler(message, ask_visa)
         return
+    if message.text in lang_options:
+        # Сохраняем язык и спрашиваем уровень
+        user_data[message.chat.id]["other_language"] = message.text
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        markup.add("🔴 Начинающий (A1–A2)", "🟡 Средний (B1–B2)"); markup.add("🟢 Продвинутый (C1)", "⭐ Свободно (C2)")
+        bot.send_message(message.chat.id, f"Какой уровень {message.text}?", reply_markup=markup)
+        bot.register_next_step_handler(message, ask_passport)
+        return
+    # Если что-то другое — продолжаем
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    markup.add("🔴 Начинающий (A1–A2)", "🟡 Средний (B1–B2)"); markup.add("🟢 Продвинутый (C1)", "⭐ Свободно (C2)")
-    bot.send_message(message.chat.id, f"Какой уровень {message.text}?", reply_markup=markup)
-    bot.register_next_step_handler(message, ask_passport)
+    markup.add("✅ Есть, действующий"); markup.add("⚠️ Скоро истечёт"); markup.add("❌ Нет")
+    bot.send_message(message.chat.id, "Загранпаспорт?", reply_markup=markup)
+    bot.register_next_step_handler(message, ask_visa)
 
 def ask_passport(message):
     if message.text and message.text.startswith("/"): bot.clear_step_handler_by_chat_id(message.chat.id); start(message); return
@@ -775,11 +838,36 @@ def ask_visa(message):
 def ask_hobbies(message):
     if message.text and message.text.startswith("/"): bot.clear_step_handler_by_chat_id(message.chat.id); start(message); return
     user_data[message.chat.id]["visa"] = message.text
+    user_data[message.chat.id]["hobbies_list"] = []
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("⚽ Спорт", "🎵 Музыка"); markup.add("💻 Технологии", "🎨 Искусство")
     markup.add("📚 Наука / чтение", "🤝 Волонтёрство"); markup.add("💼 Бизнес", "✈️ Путешествия")
-    bot.send_message(message.chat.id, "Твои главные увлечения?", reply_markup=markup)
-    bot.register_next_step_handler(message, ask_personality)
+    markup.add("✅ Готово (выбрал все)")
+    bot.send_message(message.chat.id, "Твои главные увлечения? 🎯\n\n_Можно выбрать несколько! Когда закончишь — нажми ✅ Готово_", reply_markup=markup, parse_mode="Markdown")
+    bot.register_next_step_handler(message, collect_hobbies)
+
+def collect_hobbies(message):
+    if message.text and message.text.startswith("/"): bot.clear_step_handler_by_chat_id(message.chat.id); start(message); return
+    hobbies_options = ["⚽ Спорт", "🎵 Музыка", "💻 Технологии", "🎨 Искусство", "📚 Наука / чтение", "🤝 Волонтёрство", "💼 Бизнес", "✈️ Путешествия"]
+    if message.text == "✅ Готово (выбрал все)":
+        hobbies_list = user_data[message.chat.id].get("hobbies_list", [])
+        if not hobbies_list:
+            hobbies_list = ["📚 Наука / чтение"]
+        user_data[message.chat.id]["hobbies"] = ", ".join(hobbies_list)
+        ask_personality(message)
+        return
+    if message.text in hobbies_options:
+        hobbies_list = user_data[message.chat.id].get("hobbies_list", [])
+        if message.text not in hobbies_list:
+            hobbies_list.append(message.text)
+            user_data[message.chat.id]["hobbies_list"] = hobbies_list
+        selected = ", ".join([h.split(" ", 1)[1] if " " in h else h for h in hobbies_list])
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        markup.add("⚽ Спорт", "🎵 Музыка"); markup.add("💻 Технологии", "🎨 Искусство")
+        markup.add("📚 Наука / чтение", "🤝 Волонтёрство"); markup.add("💼 Бизнес", "✈️ Путешествия")
+        markup.add("✅ Готово (выбрал все)")
+        bot.send_message(message.chat.id, f"✅ Выбрано: {selected}\n\nДобавь ещё или нажми *Готово*", reply_markup=markup, parse_mode="Markdown")
+    bot.register_next_step_handler(message, collect_hobbies)
 
 def ask_personality(message):
     if message.text and message.text.startswith("/"): bot.clear_step_handler_by_chat_id(message.chat.id); start(message); return
@@ -978,9 +1066,7 @@ def show_results(message):
         reasons = get_match_reasons(uni, data)
         reason_text = f"\n_{reasons[0]}_" if reasons else ""
         response += f"{uni['flag']} *{uni['name']}* — {uni['country']} {stars}\n💰 {uni['cost']} · 🎓 {uni['scholarship']} · РФ: {rf_status}{reason_text}\n\n"
-    response += "📌 Напиши название университета чтобы узнать подробнее!\n\n"
-    response += "💬 _Хочешь обсудить варианты? [Чат поступающих](https://t.me/Cvoi_Abroad)_\n\n"
-    response += "⚠️ _Данные актуальны на 2025 год._"
+    response += "📌 Напиши название университета чтобы узнать подробнее!\n\n💬 [Чат поступающих за рубеж](https://t.me/Cvoi_Abroad) — найди единомышленников!\n\n⚠️ _Данные актуальны на 2025 год._"
 
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("🔍 Подобрать заново", "📋 Чеклист документов")
@@ -1243,6 +1329,15 @@ def handle_university_search(message):
         f"🇷🇺 *Для граждан РФ:* {rf_status}"
         + emp_text
     )
+    emp = EMPLOYMENT_BY_COUNTRY.get(uni["country"], {})
+    if emp:
+        response += (
+            f"\n💼 *Трудоустройство* {emp.get('score', '')}\n"
+            f"Рынок: {emp.get('market', '')}\n"
+            f"Зарплата: {emp.get('salary', '')}\n"
+            f"Виза: {emp.get('visa', '')}\n"
+            f"Остаться: {emp.get('stay', '')}\n"
+        )
     if reasons:
         response += "\n🎯 *Почему подходит тебе:*\n" + "\n".join(f"• {r}" for r in reasons[:3])
     response += "\n\n⚠️ _Данные актуальны на 2025 год._"
