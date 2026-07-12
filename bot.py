@@ -1066,7 +1066,7 @@ def show_results(message):
         reasons = get_match_reasons(uni, data)
         reason_text = f"\n_{reasons[0]}_" if reasons else ""
         response += f"{uni['flag']} *{uni['name']}* — {uni['country']} {stars}\n💰 {uni['cost']} · 🎓 {uni['scholarship']} · РФ: {rf_status}{reason_text}\n\n"
-    response += "📌 Напиши название университета чтобы узнать подробнее!\n\n💬 [Чат поступающих за рубеж](https://t.me/Cvoi_Abroad) — найди единомышленников!\n\n⚠️ _Данные актуальны на 2025 год._"
+    response += "📌 Напиши название университета чтобы узнать подробнее!\n\n💬 [Чат поступающих за рубеж](https://t.me/Svoi_Abroad) — найди единомышленников!\n\n⚠️ _Данные актуальны на 2025 год._"
 
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("🔍 Подобрать заново", "📋 Чеклист документов")
@@ -1114,7 +1114,7 @@ def show_community_chat(message):
         "— задать вопросы тем кто уже учится\n"
         "— поделиться своим опытом\n"
         "— получить поддержку\n\n"
-        "👉 [Присоединиться к чату](https://t.me/Cvoi_Abroad)",
+        "👉 [Присоединиться к чату](https://t.me/Svoi_Abroad)",
         parse_mode="Markdown",
         reply_markup=main_menu_markup())
 
